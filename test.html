@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="todostyle.css">
+    
+    <script type="text/javascript" src="lib/rdfi.js"></script>
+    <script type="text/javascript" src="lib/jsonld.js"></script>
+    <script type="text/javascript" src="lib/inmemory-store.js"></script>
+    <script type="text/javascript" src="lib/jsonld-parser.js"></script>
+    <script type="text/javascript" src="lib/jsonld-serializer.js"></script>
+    <script type="text/javascript" src="lib/ldp-store.js"></script>
+    <script type="text/javascript" src="lib/ntriples-serializer.js"></script>
+    <script type="text/javascript" src="lib/promise.js"></script>
+    <script type="text/javascript" src="lib/rdfstore-store.js"></script>
+    <script type="text/javascript" src="lib/rdfxml-parser.js"></script>
+    <script type="text/javascript" src="lib/sparql-store.js"></script>
+    <script type="text/javascript" src="lib/turtle-parser.js"></script>
+    <script type="text/javascript" src="lib/turtle-serializer.js"></script>
+    <script type="text/javascript" src="lib/n3-browser.min.js"></script>
+    <script type="text/javascript" src="lib/js3.js"></script>
+    <script type="text/javascript" src="rdf-ext.js"></script>
+    
+    <script type="text/javascript" src="lib/react.js"></script>
+    <script type="text/javascript" src="lib/JSXTransformer.js"></script>
+    
+    <script type="text/javascript" src="lib/Showdown.js"></script>
+    <script type="text/javascript" src="lib/jquery-1.11.2.js"></script>
+      
+    <script>
+      g = rdf.createGraph();
+      /*g.add(rdf.createTriple(rdf.createNamedNode("a"), rdf.createNamedNode("f"), rdf.createLiteral("c")));
+      store.merge("https://localhost:8443/2013/todos.ttl", g, function(a){});
+      store.update("https://localhost:8443/2013/test.ttl", g, function(a){});
+      g.add(rdf.createTriple(localPrefix("t1"), a, todoPrefix("Todo")))
+      g.add(rdf.createTriple(localPrefix("t1"), todoPrefix("assignee"), rdf.NamedNode("http://openinitiative.com/users/sylvain")))
+      g.add(rdf.createTriple(localPrefix("t1"), rdfsPrefix("label"), rdf.Literal("Faire les courses")))
+      store.merge("https://localhost:8443/2013/todos.ttl", g, function(a){})
+      store.graph("https://localhost:8443/2013/todos.ttl", function(){})
+      */
+    </script>
+    <script type="text/jsx" src="LdpTodo.js"></script>
+    <script type="text/jsx" src="ldp-todolist.js"></script>
+  </head>
+  <body>
+    <div id="todolistcontainer">
+      <div id="todolist">
+      </div>
+    </div>
+  </body>
+</html>
