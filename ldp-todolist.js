@@ -58,14 +58,14 @@ var TodoBox = React.createClass({
   },
   handleNewTodo: function(todo) {
     this.setState({data: this.state.data.concat([todo])});
-    store.add(this.props.url, todoParser([todo]), function(){});
+    store.add(this.props.url, todoParser([todo]), function(){}, {method: 'POST'});
   },
   getInitialState: function() {
     return {data: []};
   },
   componentDidMount: function() {
     this.fetchTodos();
-//    setInterval(this.fetchTodos, this.props.pollInterval);
+    setInterval(this.fetchTodos, this.props.pollInterval);
   },
   render: function() {
     return (
