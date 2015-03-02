@@ -1,8 +1,17 @@
 # LDP-Todo-List
 Tutorial on creating a Todo List for LDP achitectures
 
+Please check the wiki:
+-> https://github.com/Open-Initiative/LDP-Todo-List/wiki
+
 ##Dependencies
-* LDP server, currently tested with RwwPlay!
+
+###Server side
+LDP server  
+The application has been tested with RwwPlay!
+See https://github.com/Open-Initiative/LDP-Todo-List/wiki/Notes-on-installing-RwwPlay for installation
+
+###Client side
 * rdf-ext.js (Open Initiative patched version)
 * rdfi.js
 * N3.js
