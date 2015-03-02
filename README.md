@@ -12,7 +12,7 @@ The application has been tested with RwwPlay!
 See https://github.com/Open-Initiative/LDP-Todo-List/wiki/Notes-on-installing-RwwPlay for installation
 
 ###Client side
-* rdf-ext.js (Open Initiative patched version)
+* rdf-ext.js
 * rdfi.js
 * N3.js
 * react.js
