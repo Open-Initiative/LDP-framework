@@ -39,6 +39,5 @@ function rdfsPrefix(x) { return rdf.NamedNode("http://www.w3.org/2000/01/rdf-sch
 function rdfPrefix(x) { return rdf.NamedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#"+x)};
 a = rdfPrefix("type");
 
-N3.Util.isIRI = N3.Util.isUri;
 store = new rdf.LdpStore();
 serializer = new rdf.JsonLdSerializer();

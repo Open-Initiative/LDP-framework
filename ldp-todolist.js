@@ -1,11 +1,8 @@
-var converter = new Showdown.converter();
-
 var Todo = React.createClass({
   render: function() {
-    var rawMarkup = converter.makeHtml(this.props.children.toString());
     return (
       <div className="todo">
-        <h4><span dangerouslySetInnerHTML={{__html: rawMarkup}} /></h4>
+        <h4>{this.props.children.toString()}</h4>
         {this.props.assignee}
       </div>
     );
