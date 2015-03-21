@@ -14,6 +14,7 @@ See https://github.com/Open-Initiative/LDP-Todo-List/wiki/Notes-on-installing-Rw
 ###Client side
 * rdf-ext.js
 * rdfi.js
+* jsonld.js
 * N3.js
 * react.js
 * JSXTransformer.js
