@@ -18,11 +18,31 @@
     <script type="text/javascript" src="lib/turtle-serializer.js"></script>
     <script type="text/javascript" src="lib/n3-browser.min.js"></script>
     <script type="text/javascript" src="rdf-ext.js"></script>
+    <script type="text/javascript" src="lib/rdf-jsonify.js"></script>
     
-    <script type="text/javascript" src="lib/react.js"></script>
-    <script type="text/javascript" src="lib/JSXTransformer.js"></script>
-    <script type="text/javascript" src="LdpStore.js"></script>
-    <script type="text/jsx" src="ldp-profiles.js"></script>
+    <script type="text/javascript" src="lib/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="lib/handlebars-v3.0.3.js"></script>
+    
+    <script id="profile-template" type="text/x-handlebars-template">
+        <div>{{about.name}}: {{about.description}}</div>
+    </script>
+    
+    <script id="main-template" type="text/x-handlebars-template">
+        People:
+        <div id="people">
+            {{#each objects}}{{> profile }}{{/each}}
+        </div>
+    </script>
+    
+    <script>
+        $(function(){
+            var containerId = "https://ldp.openinitiative.com:8443/2013/people/";
+            var context="http://ld.hackers4peace.net/contexts/plp.jsonld";
+            var mainTemplate = Handlebars.compile($("#main-template").html());
+            Handlebars.registerPartial('profile',$("#profile-template").html());
+            (new rdf.JSONify()).render(containerId, "#profilebrowser", mainTemplate, context)
+        });
+    </script>
   </head>
   <body>
     <div id="profilebrowsercontainer">
