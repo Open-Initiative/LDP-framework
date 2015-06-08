@@ -2,19 +2,14 @@
 'use strict';
 
 
-var isNode = (typeof process !== 'undefined' && process.versions && process.versions.node);
 
 var modCtx = (new Function('return this'))();
 
-
-if (isNode) {
-  module.exports = function (rdf) {
-    modCtx = {};
-    modCtx.rdf = rdf;
-    modCtx.jsonld = require('jsonld');
-    modCtx.Promise = require('es6-promise').Promise;
-  };
-}
+modCtx = {};
+modCtx.rdf =require('rdf-ext')();
+window.rdf= require('rdf-ext')();
+modCtx.jsonld = require('jsonld');
+modCtx.Promise = require('es6-promise').Promise;
 
 
 var JsonLdUtils = {};
