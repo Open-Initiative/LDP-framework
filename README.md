@@ -1,5 +1,5 @@
 # LDP-Todo-List
-Tutorial on creating a Todo List for LDP achitectures
+Simple framework for LDP achitectures
 
 Please check the wiki:
 -> https://github.com/Open-Initiative/LDP-Todo-List/wiki
@@ -18,3 +18,15 @@ See https://github.com/Open-Initiative/LDP-Todo-List/wiki/Notes-on-installing-Rw
 * N3.js
 * react.js
 * JSXTransformer.js
+
+##Features
+* Add resource
+* Update resource
+* Get resource
+* List resources of a container
+* render resource with template
+
+##Usage
+See test-profiles.html as an example.
+The framework uses Handlebars as a template engine.
+Use the methods get, put, add, list, render.
