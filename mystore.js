@@ -41916,12 +41916,14 @@ window.MyStore = function (options) {
         var objects = [];
         
         this.list(container).then(function(objectlist) {
-            objectlist.forEach(function(object) {
-                this.get(object, context).then(function(object){
-                    objects.push(object);
-                    $(div).html(template({objects: objects}));
-                });
-            }.bind(this));
+	    if (typeof objectlist != 'undefined' && typeof objectlist == 'object') {
+                objectlist.forEach(function(object) {
+                    this.get(object, context).then(function(object){
+                        objects.push(object);
+                        $(div).html(template({objects: objects}));
+                    });
+                }.bind(this));
+	    }
         }.bind(this));
     }
     

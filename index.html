@@ -9,11 +9,11 @@
     <script id="profile-template" type="text/x-handlebars-template">
         <div>{{about.name}}: {{about.description}}</div>
     </script>
-    
+        
     <script id="main-template" type="text/x-handlebars-template">
         People:
         <div id="people">
-            {{#each objects}}{{> profile }}{{/each}}
+            {{#each objects}} {{> profile }}{{/each}}
         </div>
     </script>
     
@@ -27,12 +27,28 @@
             });
             store.render("#profilebrowser")
         });
+
+	$.post(
+	   success : function() {
+		
+	   },
+	   error : function() {
+	 	alert("There has been an error processing your request");
+	   }
+	)
     </script>
   </head>
   <body>
     <div id="profilebrowsercontainer">
       <div id="profilebrowser">
       </div>
+      <div id="profilebrowser-origin">
+      </div>
     </div>
+    <form>
+    <input type="text" name="name" placeholder="Ton nom" />
+    <input type="text" name="description" placeholder="Ta description" />
+    <input type="submit" action="#" />
+    </form>
   </body>
 </html>
