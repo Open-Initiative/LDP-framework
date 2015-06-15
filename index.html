@@ -17,38 +17,71 @@
         </div>
     </script>
     
+    <script id="select-template" type="text/x-handlebars-template">
+    	<select name="Assignee">
+	    {{#each objects}} {{> profile}}{{/each}}
+    	</select>
+    </script>
+
+    <script id="option-template" type="text/x-handlebars-template">
+	<option name="assignee-name" value='{{about.id}}'>{{about.name}}</option>
+    </script>
+
     <script>
         $(function(){
             window.store = new MyStore({
-                container: "https://ldp.openinitiative.com:8443/2013/people/",
+                container: "https://localhost:8443/2013/people/",
                 context: "http://ld.hackers4peace.net/contexts/plp.jsonld",
                 template: $("#main-template").html(),
                 partials: {'profile': $("#profile-template").html()},
             });
-            store.render("#profilebrowser")
+            store.render("#profilebrowser");
+
+	    //Render the people list in the select assignee form field.
+	    window.store2 = new MyStore({
+                container: "https://localhost:8443/2013/people/",
+                context: "http://ld.hackers4peace.net/contexts/plp.jsonld",
+	    	template: $("#select-template").html(),
+		partials: {'profile': $("option-template").html()}
+	    });
+	    store2.render("#assignee-select");
+	    
         });
 
-	$.post(
-	   success : function() {
-		
-	   },
-	   error : function() {
-	 	alert("There has been an error processing your request");
-	   }
-	)
+	//Create a new element in the store and refresh the list
+	function addNewPeople() {
+	    var name = $('#name').val();
+	    var description = $('#description').val();
+	    var data =  {"@context": "http://ld.hackers4peace.net/contexts/plp.jsonld", about: {name:name, description: description}};
+	    window.store.save(data);
+	    window.store.render("#profilebrowser");
+	};
+	
+        //Create a new element in the Todos and refresh the list
+	function addNewTodo() {
+	    var label = $('#label').val();
+	    var assignee = $('#assignee').val();
+	    var data =  {"@context": "http://localhost:8443/contexts/plp.jsonld", about: {assignee:assignee, label: label}};
+	    window.store.save(data);
+	    window.store.render("#profilebrowser");
+	};
     </script>
   </head>
   <body>
     <div id="profilebrowsercontainer">
       <div id="profilebrowser">
       </div>
-      <div id="profilebrowser-origin">
-      </div>
     </div>
-    <form>
-    <input type="text" name="name" placeholder="Ton nom" />
-    <input type="text" name="description" placeholder="Ta description" />
-    <input type="submit" action="#" />
-    </form>
+    <h2>Create a new People</h2>
+    <input type="text" id="name" name="name" placeholder="Ton nom" />
+    <input type="text" id="description" name="description" placeholder="Ta description" />
+    <button onclick="javascript:addNewPeople();">Valider</button>
+
+    <h2>Create a new Task</h2>
+    <div id="assignee-select">
+    </div>
+    <input type="text" id="assignee" name="assignee" placeholder="Assignee">
+    <input type="text" id="label" name="label" placeholder="What to do ?">
+    <button onclick="javascript:addNewTodo();">Valider</button>
   </body>
 </html>
