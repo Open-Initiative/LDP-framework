@@ -26112,7 +26112,7 @@ modCtx.rdf.JSONify = function (store, options) {
   this.add = function () {
     var param = parseIriObjectsArgs(arguments);
     
-    return objectsToGraph(param.iri, param.objects)
+    return objectsToGraph("", param.objects)
       .then(function (graph) { graph.etag=this.etags[param.iri];return store.add(documentIri(param.iri), graph, {'useEtag': true, 'method': 'POST'}); }.bind(this))
       .then(function (added, error) {
         return new modCtx.Promise(function (resolve, reject) {
