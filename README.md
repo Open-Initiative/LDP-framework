@@ -7,7 +7,7 @@ Please check the wiki:
 ##Dependencies
 
 ###Server side
-LDP server  
+LDP server
 The application has been tested with RwwPlay!
 See https://github.com/Open-Initiative/LDP-Todo-List/wiki/Notes-on-installing-RwwPlay for installation
 
@@ -27,6 +27,6 @@ See https://github.com/Open-Initiative/LDP-Todo-List/wiki/Notes-on-installing-Rw
 * render resource with template
 
 ##Usage
-See test-profiles.html as an example.
+See index.html as an example.
 The framework uses Handlebars as a template engine.
 Use the methods get, put, add, list, render.

@@ -3,8 +3,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link rel="stylesheet" type="text/css" href="todostyle.css">
-    <script type="text/javascript" src="node_modules/jquery/dist/jquery.js"></script>
-    <script type="text/javascript" src="node_modules/handlebars/dist/handlebars.js"></script>
+    <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="mystore.js"></script>
     
     <script id="profile-template" type="text/x-handlebars-template">
@@ -20,11 +19,13 @@
     
     <script>
         $(function(){
-            var containerId = "https://ldp.openinitiative.com:8443/2013/people/";
-            var context="http://ld.hackers4peace.net/contexts/plp.jsonld";
-            var mainTemplate = Handlebars.compile($("#main-template").html());
-            Handlebars.registerPartial('profile',$("#profile-template").html());
-            (new rdf.JSONify()).render(containerId, "#profilebrowser", mainTemplate, context)
+            window.store = new MyStore({
+                container: "https://ldp.openinitiative.com:8443/2013/people/",
+                context: "http://ld.hackers4peace.net/contexts/plp.jsonld",
+                template: $("#main-template").html(),
+                partials: {'profile': $("#profile-template").html()},
+            });
+            store.render("#profilebrowser")
         });
     </script>
   </head>
