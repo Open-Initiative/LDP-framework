@@ -12660,9 +12660,9 @@ var SerializerPromiseWrapper = function (p, serializer) {
 
 
 var StorePromiseWrapper = function (p, store) {
-  this.graph = funcTemplate(function (args, callback) { store.graph(args[0], callback); }, p);
+  this.graph = funcTemplate(function (args, callback) { store.graph(args[0], callback, args[1]); }, p);
   this.match = funcTemplate(function (args, callback) { store.match(args[0], args[1], args[2], args[3], callback, args[5]); }, p);
-  this.add = funcTemplate(function (args, callback) { store.add(args[0], args[1], callback); }, p);
+  this.add = funcTemplate(function (args, callback) { store.add(args[0], args[1], callback, args[2]); }, p);
   this.merge = funcTemplate(function (args, callback) { store.merge(args[0], args[1], callback); }, p);
   this.remove = funcTemplate(function (args, callback) { store.remove(args[0], args[1], callback); }, p);
   this.removeMatches = funcTemplate(function (args, callback) { store.removeMatches(args[0], args[1], args[2], args[3], callback); }, p);
