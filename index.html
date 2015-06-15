@@ -18,13 +18,14 @@
     </script>
     
     <script id="select-template" type="text/x-handlebars-template">
+	Assignee:
     	<select name="Assignee">
-	    {{#each objects}} {{> profile}}{{/each}}
+	    {{#each objects}} {{> assignee}}{{/each}}
     	</select>
     </script>
 
-    <script id="option-template" type="text/x-handlebars-template">
-	<option name="assignee-name" value='{{about.id}}'>{{about.name}}</option>
+    <script id="assignee-template" type="text/x-handlebars-template">
+	<option name="assignee-name">{{about.name}}</option>
     </script>
 
     <script>
@@ -38,13 +39,13 @@
             store.render("#profilebrowser");
 
 	    //Render the people list in the select assignee form field.
-	    window.store2 = new MyStore({
+	    store2 = new MyStore({
                 container: "https://localhost:8443/2013/people/",
                 context: "http://ld.hackers4peace.net/contexts/plp.jsonld",
 	    	template: $("#select-template").html(),
-		partials: {'profile': $("option-template").html()}
+		partials: {'assignee': $("#assignee-template").html()},
 	    });
-	    store2.render("#assignee-select");
+	    store2.render("#assigneeselect");
 	    
         });
 
@@ -78,9 +79,7 @@
     <button onclick="javascript:addNewPeople();">Valider</button>
 
     <h2>Create a new Task</h2>
-    <div id="assignee-select">
-    </div>
-    <input type="text" id="assignee" name="assignee" placeholder="Assignee">
+    <div id="assigneeselect"></div>
     <input type="text" id="label" name="label" placeholder="What to do ?">
     <button onclick="javascript:addNewTodo();">Valider</button>
   </body>
