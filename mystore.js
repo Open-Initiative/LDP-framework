@@ -41894,7 +41894,10 @@ window.MyStore = function (options) {
     
     this.list = function list(containerIri) {
         return this.get(containerIri).then(function(container) {
-            return container['http://www.w3.org/ns/ldp#contains'];
+            var objectList = container['http://www.w3.org/ns/ldp#contains'] || [];
+            if('@id' in objectList)
+                objectList = [objectList];
+            return objectList;
         });
     }
     
@@ -41914,6 +41917,7 @@ window.MyStore = function (options) {
         var template = template || this.mainTemplate;
         var context = context || this.context;
         var objects = [];
+        $(div).html(template({objects: objects}));
         
         this.list(container).then(function(objectlist) {
             objectlist.forEach(function(object) {

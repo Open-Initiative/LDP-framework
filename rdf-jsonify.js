@@ -54,7 +54,7 @@ window.MyStore = function (options) {
     options             = options || {};
     this.container      = options.container;
     this.context        = options.context;
-    this.mainTemplate   = Handlebars.compile(options.template);
+    if('template' in options) this.mainTemplate   = Handlebars.compile(options.template);
     if('partials' in options)
         for(var partialName in options.partials)
             Handlebars.registerPartial(partialName, options.partials[partialName]);
@@ -186,7 +186,10 @@ window.MyStore = function (options) {
     
     this.list = function list(containerIri) {
         return this.get(containerIri).then(function(container) {
-            return container['http://www.w3.org/ns/ldp#contains'];
+            var objectList = container['http://www.w3.org/ns/ldp#contains'] || [];
+            if('@id' in objectList)
+                objectList = [objectList];
+            return objectList;
         });
     }
     
@@ -206,6 +209,7 @@ window.MyStore = function (options) {
         var template = template || this.mainTemplate;
         var context = context || this.context;
         var objects = [];
+        $(div).html(template({objects: objects}));
         
         this.list(container).then(function(objectlist) {
             objectlist.forEach(function(object) {
@@ -324,132 +328,5 @@ window.MyStore = function (options) {
                     resolve();
                 });
             });
-    };
-
-    /**
-     * Assigns a JSON-LD context to a route
-     *
-     * @param {String|RegExp} path Path the IRI starts with or a RegExp to test
-     * @param {Object} context JSON-LD context to compact the graph
-     * @returns {JSONify}
-     */
-    this.addContext = function (path, context) {
-        if (typeof path === 'string') {
-            routedContexts[path] = {
-                'startsWith': path,
-                'context': context
-            };
-        } else if (path instanceof RegExp) {
-            routedContexts[path] = {
-                'regexp': path,
-                'context': context
-            };
-        }
-
-        return this;
-    };
-};
-
-
-/**
- * RESTful cached read only interface for RDF-Ext Store using JSON-LD
- *
- * @param JSONify
- * @param {Object} [options]
- * @constructor
- */
-rdf.CachedJSONify = function (JSONify, options) {
-    if (options == null) {
-        options = {};
-    }
-
-    if (JSONify == null) {
-        JSONify = new rdf.JSONify(null, options);
-    }
-
-    var
-        cache = {},
-        queue = {};
-
-    var enqueue = function (iri, context, callback) {
-        if (iri in queue) {
-            queue[iri].push(callback);
-        } else {
-            queue[iri] = [callback];
-
-            JSONify.get(iri, context).then(function (data) {
-                cache[iri] = data;
-
-                for (var i = 0; i < queue[iri].length; i++) {
-                    queue[iri][i](data);
-                }
-            });
-        }
-    };
-
-    /**
-     * Fetches a JSON-LD object of the given IRI
-     *
-     * @param {String} iri IRI of the named graph
-     * @param {Object} [context] JSON-LD context to compact the graph
-     * @param {Function} callback Callback function if object isn't cached
-     * @returns {Object}
-     */
-    this.get = function (iri) {
-        var
-            context = null,
-            callback = arguments[arguments.length - 1];
-
-        if (iri in cache) {
-            return cache[iri];
-        }
-
-        if (arguments.length === 3) {
-            context = arguments[1];
-        }
-
-        enqueue(iri, context, callback);
-
-        return null;
-    };
-
-    /**
-     * Clears the complete cache or if given for a single IRI
-     *
-     * @param {String} [iri] The IRI to clear
-     * @returns {CachedJSONify}
-     */
-    this.clear = function (iri) {
-        if (iri != null) {
-            // clear object cache
-            if (iri in cache) {
-                delete cache[iri];
-            }
-
-            // clear queued callbacks
-            if (iri in queue) {
-                delete queue[iri];
-            }
-        } else {
-            cache = {};
-            queue = {};
-        }
-
-        return this;
-    };
-
-    /**
-     * Assigns a JSON-LD context to a route
-     *
-     * See JSONify.addContext documentation
-     *
-     * @param {String|RegExp} path Path the IRI starts with or a RegExp to test
-     * @param {Object} context JSON-LD context to compact the graph
-     * @returns {CachedJSONify}
-     */
-    this.addContext = function (path, context) {
-        JSONify.addContext(path, context);
-
-        return this;
     };
 };
