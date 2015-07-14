@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="todostyle.css">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" type="text/css" href="todostyle.css" />
         <script type="text/javascript" src="jquery.min.js"></script>
         <script type="text/javascript" src="mystore.js"></script>
         
         <script id="profile-template" type="text/x-handlebars-template">
-                <div>{{about.name}}: {{about.description}}</div>
+            <div>{{about.name}}: {{about.description}}</div>
         </script>
         <script id="people-template" type="text/x-handlebars-template">
-                People:
-                <div id="people">
-                        {{#each objects}}{{> profile }}{{/each}}
-                </div>
+            People:
+            <div id="people">
+                    {{#each objects}}{{> profile }}{{/each}}
+            </div>
         </script>
         
         <script id="todo-template" type="text/x-handlebars-template">
@@ -25,44 +25,24 @@
         <script id="todolist-template" type="text/x-handlebars-template">
             <h2>Todo List!</h2>
             {{#each objects}}{{> todo }}{{/each}}
-            <form className="todoForm" onSubmit="console.log(e)">
-                <h4>Add a new task</h4>
-                <input type="text" placeholder="The task assignee" name="assignee" />
-                <input type="text" placeholder="What do you need to do today?" name="label" />
+            <h4>Add a new task</h4>
+            <form className="todoForm" onSubmit="return store.handleSubmit(event, 'todos/');">
+                <input type="text" placeholder="The task assignee" name="todos:assignee" />
+                <input type="text" placeholder="What do you need to do today?" name="todos:label" />
                 <input type="submit" value="Post" />
             </form>
         </script>
         
         <script>
-            var reduceForm = function reduceForm(form) {
-                return $(form).serializeArray().reduce(function(obj, field){
-                    obj[field.name] = field.value; return obj
-                }, {});
-            };
-            addTodo = function addTodo(e) {
-                console.log(e);
-                return false;
-                todo = reduceForm(form);
-                store2.save(todo);
-                return false;
-            };
             $(function(){
                 window.store = new MyStore({
-                    container: "https://ldp.openinitiative.com:8443/2013/people/",
-                    context: "http://ld.hackers4peace.net/contexts/plp.jsonld",
+                    container: document.location.hash.slice(1)||"https://ldp.openinitiative.com:8443/2013/",
+                    context: "http://owl.openinitiative.com/oiowl.jsonld",
                     template: $("#people-template").html(),
-                    partials: {'profile': $("#profile-template").html()},
+                    partials: {'profile': $("#profile-template").html(), 'todo': $("#todo-template").html()},
                 });
-                store.render("#profilebrowser");
-            });
-            $(function(){
-                window.store2 = new MyStore({
-                    container: "https://ldp.openinitiative.com:8443/2013/todos/",
-                    context: "http://owl.openinitiative.com/oitodo.jsonld",
-                    template: $("#todolist-template").html(),
-                    partials: {'todo': $("#todo-template").html()},
-                });
-                store2.render("#todolist");
+                store.render("#profilebrowser", "people/");
+                store.render("#todolist", "todos/", $("#todolist-template").html(), "http://owl.openinitiative.com/oitodo.jsonld");
             });
         </script>
     </head>

@@ -3,6 +3,7 @@
 
 require('jquery');
 var Handlebars = require('handlebars');
+//require('./node_modules/alpaca/');
 require('rdf-ext');
 require('jsonld');
 
@@ -67,8 +68,7 @@ window.MyStore = function (options) {
 
     var
         parser = new rdf.promise.Parser(new rdf.JsonLdParser()),
-        serializer = new rdf.promise.Serializer(new rdf.JsonLdSerializer()),
-        routedContexts = {};
+        serializer = new rdf.promise.Serializer(new rdf.JsonLdSerializer());
 
     // returns the document part of an hash IRI
     var documentIri = function (iri) {
@@ -104,7 +104,7 @@ window.MyStore = function (options) {
             // use context routing of no context is defined
             if (!('@context' in object)) {
                 object = JSON.parse(JSON.stringify(object));
-                object['@context'] = findContext(iri);
+                object['@context'] = this.context;
             }
 
             // use IRI if no id is defined
@@ -119,26 +119,29 @@ window.MyStore = function (options) {
             .then(function () { return graph; });
     };
 
-    // find a routing based context
-    var findContext = function (iri) {
-        for (var key in routedContexts) {
-            var route = routedContexts[key];
-
-            if ('startsWith' in route && iri.indexOf(route.startsWith) === 0) {
-                return route.context;
-            }
-
-            if ('regexp' in route && route.regexp.test(iri)) {
-                return route.context;
-            }
+    //TODO: find out why ids get messed up
+    this.resetId = function resetId(o) {
+        if(o.id) {
+            o['@id'] = o.id;
+            delete o.id;
         }
+        return o;
+    }
 
-        return {};
+    this.reduceForm = function reduceForm(form) {
+        return $(form).serializeArray().reduce(function(obj, field){
+            obj[field.name] = field.value; return obj
+        }, {});
     };
+    
+    this.handleSubmit = function handleSubmit(event, container) {
+        this.save(this.reduceForm(event.target), container);
+        return false;
+    }
 
     /**
-     * Fetches a JSON-LD object of the given IRI
-     * If no context is given, it will try to get the context via routing,
+     * Fetches a LDP resource of the given IRI
+     * If no context given, takes the default one
      *
      * @param {String} iri IRI of the named graph
      * @param {Object} [context] JSON-LD context to compact the graph
@@ -147,12 +150,13 @@ window.MyStore = function (options) {
     this.get = function get(object, context) {
         var iri;
         if (typeof object === 'string') {
-                iri = object;
+            iri = object;
         } else {
-                iri = object['@id'];
+            this.resetId(object);
+            iri = object['@id'];
         }
         if (context == null) {
-            context = findContext(iri);
+            context = this.context;
         }
 
         return store.graph(documentIri(iri), {'useEtag': true})
@@ -163,17 +167,7 @@ window.MyStore = function (options) {
                 return JsonLdUtils.compact(frame, context);
             });
     };
-
-    //TODO: find out why ids get messed up
-    this.resetId = function resetId(o) {
-        if(o.id) {
-            o['@id'] = o.id;
-            delete o.id;
-        }
-        return o;
-    }
-
-    this.save = function save(object) {
+    this.save = function save(object, container) {
         this.resetId(object);
         if(!('@context' in object))
             object['@context'] = this.context;
@@ -181,12 +175,12 @@ window.MyStore = function (options) {
         if('@id' in object)
             this.put(object);
         else
-            this.add(this.container, object);
+            this.add(this.getIri(container), object);
     }
     
     this.list = function list(containerIri) {
         return this.get(containerIri).then(function(container) {
-            var objectList = container['http://www.w3.org/ns/ldp#contains'] || [];
+            var objectList = container['ldp:contains'] || [];
             if('@id' in objectList)
                 objectList = [objectList];
             return objectList;
@@ -204,9 +198,15 @@ window.MyStore = function (options) {
         }.bind(this));
     }
     
+    this.getIri = function getIri(iri) {
+        if(!iri) return this.container;
+        if(iri.startsWith("http://")) return iri;
+        return this.container + iri;
+    }
+    
     this.render = function render(div, containerIri, template, context) {
-        var container = containerIri || this.container;
-        var template = template || this.mainTemplate;
+        var container = this.getIri(containerIri);
+        var template = template ? Handlebars.compile(template) : this.mainTemplate;
         var context = context || this.context;
         var objects = [];
         $(div).html(template({objects: objects}));
