@@ -29549,6 +29549,10 @@ var LdpStore = function (rdf, options) {
       headers['If-Match'] = graph.etag;
     }
 
+    if ('headers' in options && options.headers) {
+      $.extend(headers, options.headers);
+    }
+    
     self.serializers[contentType](graph, function (data, error) {
       // serializer error
       if (error) {
@@ -34352,22 +34356,32 @@ window.MyStore = function (options) {
     };
 
     // parse iri + object arguments
+    //TODO: clean up argument syntax
     var parseIriObjectsArgs = function (args) {
+        if (typeof args[1] === 'string') {
+            return {
+                'headers': args[0],
+                'iri': args[1],
+                'objects': Array.prototype.slice.call(args).slice(2)
+            };
+        }
         if (typeof args[0] === 'string') {
             return {
                 'iri': args[0],
+                'headers': undefined,
                 'objects': Array.prototype.slice.call(args).slice(1)
             };
         }
 
         return {
             'iri': '@id' in args[0] ? args[0]['@id'] : null,
+            'slug': undefined,
             'objects': Array.prototype.slice.call(args).slice()
         };
     };
 
     // merges multiple JSON-LD objects into a single graph
-    var objectsToGraph = function (iri, objects) {
+    this.objectsToGraph = function objectsToGraph(iri, objects) {
         var
             graph = rdf.createGraph(),
             parseAll = [];
@@ -34389,7 +34403,7 @@ window.MyStore = function (options) {
             }
 
             parseAll.push(parser.parse(object, iri).then(addToGraph));
-        });
+        }.bind(this));
 
         return Promise.all(parseAll)
             .then(function () { return graph; });
@@ -34431,9 +34445,7 @@ window.MyStore = function (options) {
             this.resetId(object);
             iri = object['@id'];
         }
-        if (context == null) {
-            context = this.context;
-        }
+        context = context || this.context;
 
         return store.graph(documentIri(iri), {'useEtag': true})
             .then(function(graph) {this.etags[iri]=graph.etag;return serializer.serialize(graph)}.bind(this))
@@ -34443,6 +34455,12 @@ window.MyStore = function (options) {
                 return JsonLdUtils.compact(frame, context);
             });
     };
+    
+    this.createContainer = function createContainer(containerName, parentIri) {
+        var container = {'@type': 'ldp:BasicContainer'};
+        this.add({'Slug': containerName, 'Link': '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"'}, this.getIri(parentIri), container);
+    }
+    
     this.save = function save(object, container) {
         this.resetId(object);
         if(!('@context' in object))
@@ -34476,7 +34494,7 @@ window.MyStore = function (options) {
     
     this.getIri = function getIri(iri) {
         if(!iri) return this.container;
-        if(iri.startsWith("http://")) return iri;
+        if(iri.startsWith("http://")||iri.startsWith("https://")) return iri;
         return this.container + iri;
     }
     
@@ -34507,8 +34525,8 @@ window.MyStore = function (options) {
     this.add = function () {
         var param = parseIriObjectsArgs(arguments);
         
-        return objectsToGraph("", param.objects)
-            .then(function (graph) { graph.etag=this.etags[param.iri];return store.add(documentIri(param.iri), graph, {'useEtag': true, 'method': 'POST'}); }.bind(this))
+        return this.objectsToGraph("", param.objects)
+            .then(function (graph) { return store.add(documentIri(param.iri), graph, {'method': 'POST', 'headers': param.headers}); }.bind(this))
             .then(function (added, error) {
                 return new Promise(function (resolve, reject) {
                     if (error != null) {
@@ -34533,7 +34551,7 @@ window.MyStore = function (options) {
     this.put = function () {
         var param = parseIriObjectsArgs(arguments);
         
-        return objectsToGraph(param.iri, param.objects)
+        return this.objectsToGraph(param.iri, param.objects)
             .then(function (graph) { graph.etag=this.etags[param.iri];return store.add(documentIri(param.iri), graph, {'useEtag': true}); }.bind(this))
             .then(function (added, error) {
                 return new Promise(function (resolve, reject) {
@@ -34560,7 +34578,7 @@ window.MyStore = function (options) {
     this.patch = function () {
         var param = parseIriObjectsArgs(arguments);
 
-        return objectsToGraph(param.iri, param.objects)
+        return this.objectsToGraph(param.iri, param.objects)
             .then(function (graph) { return store.merge(documentIri(param.iri), graph); })
             .then(function (merged, error) {
                 return new Promise(function (resolve, reject) {

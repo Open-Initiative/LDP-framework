@@ -37,12 +37,12 @@
             $(function(){
                 window.store = new MyStore({
                     container: document.location.hash.slice(1)||"https://ldp.openinitiative.com:8443/2013/",
-                    context: "http://owl.openinitiative.com/oiowl.jsonld",
+                    context: "http://owl.openinitiative.com/oicontext.jsonld",
                     template: $("#people-template").html(),
                     partials: {'profile': $("#profile-template").html(), 'todo': $("#todo-template").html()},
                 });
                 store.render("#profilebrowser", "people/");
-                store.render("#todolist", "todos/", $("#todolist-template").html(), "http://owl.openinitiative.com/oitodo.jsonld");
+                store.render("#todolist", "todos/", $("#todolist-template").html(), "http://owl.openinitiative.com/oicontext.jsonld");
             });
         </script>
     </head>

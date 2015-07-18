@@ -50,6 +50,9 @@ Only the first parameter is required. For other, the default given in initiatili
 ### Delete resource
 `store.delete(objectIri)`
 
+### Create a container
+`store.createContainer(containerName, parentContainer)`
+
 ### Form handling
 ```
 <form onSubmit="return store.handleSubmit(event, containerIri);">
