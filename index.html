@@ -18,19 +18,15 @@
         
         <script id="todo-template" type="text/x-handlebars-template">
             <div className="todo">
-                <h4>{{label}}</h4>
-                {{assignee}}
+                <h4>{{todos:label}}</h4>
+                {{todos:assignee}}
             </div>
         </script>
         <script id="todolist-template" type="text/x-handlebars-template">
             <h2>Todo List!</h2>
             {{#each objects}}{{> todo }}{{/each}}
             <h4>Add a new task</h4>
-            <form className="todoForm" onSubmit="return store.handleSubmit(event, 'todos/');">
-                <input type="text" placeholder="The task assignee" name="todos:assignee" />
-                <input type="text" placeholder="What do you need to do today?" name="todos:label" />
-                <input type="submit" value="Post" />
-            </form>
+            {{{form 'todos'}}}
         </script>
         
         <script>
@@ -40,13 +36,14 @@
                     context: "http://owl.openinitiative.com/oicontext.jsonld",
                     template: $("#people-template").html(),
                     partials: {'profile': $("#profile-template").html(), 'todo': $("#todo-template").html()},
+                    models: {'todos': {fields: [{title: "What do you need to do today?", name: "todos:label"}, {title: "Who should do it?", name: "todos:assignee"}], container: "todos/"}},
                 });
                 store.render("#profilebrowser", "people/");
-                store.render("#todolist", "todos/", $("#todolist-template").html(), "http://owl.openinitiative.com/oicontext.jsonld");
+                store.render("#todolist", "todos/", $("#todolist-template").html());
             });
         </script>
     </head>
-        <body>
+    <body>
         <div id="todolistcontainer">
             <div id="todolist">
             </div>

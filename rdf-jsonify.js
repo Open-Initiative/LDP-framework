@@ -3,7 +3,6 @@
 
 require('jquery');
 var Handlebars = require('handlebars');
-//require('./node_modules/alpaca/');
 require('rdf-ext');
 require('jsonld');
 
@@ -55,18 +54,29 @@ window.MyStore = function (options) {
     options             = options || {};
     this.container      = options.container;
     this.context        = options.context;
-    if('template' in options) this.mainTemplate   = Handlebars.compile(options.template);
+    this.models         = options.models;
+    if('template' in options) this.mainTemplate = Handlebars.compile(options.template);
+    
+    var fieldPartial = "<input type='text' placeholder='{{title}}' name='{{name}}' /><br/>";
+    var formTemplate = Handlebars.compile("<form data-container='{{container}}' onSubmit='return store.handleSubmit(event);'> \
+            {{#each fields}}{{> LDPField }}{{/each}} \
+            <input type='submit' value='Post' /> \
+        </form>");
+    
+    Handlebars.registerPartial("LDPField", fieldPartial);
     if('partials' in options)
         for(var partialName in options.partials)
             Handlebars.registerPartial(partialName, options.partials[partialName]);
     
+    Handlebars.registerHelper('form', function(context, options) {
+        return formTemplate(this.models[context]);
+    }.bind(this));
+    
     var storeOptions = {};
-    if ('corsProxy' in options) {
-        storeOptions.request = rdf.corsProxyRequest.bind(rdf, options.corsProxy)
-    }
-    var store = options.store ||  new rdf.promise.Store(new rdf.LdpStore(storeOptions));
+    if ('corsProxy' in options)
+        storeOptions.request = rdf.corsProxyRequest.bind(rdf, options.corsProxy);
 
-    var
+    var store = options.store || new rdf.promise.Store(new rdf.LdpStore(storeOptions)),
         parser = new rdf.promise.Parser(new rdf.JsonLdParser()),
         serializer = new rdf.promise.Serializer(new rdf.JsonLdSerializer());
 
@@ -144,11 +154,12 @@ window.MyStore = function (options) {
         }, {});
     };
     
-    this.handleSubmit = function handleSubmit(event, container) {
-        this.save(this.reduceForm(event.target), container);
+    this.handleSubmit = function handleSubmit(event) {
+        this.save(this.reduceForm(event.target), event.target.dataset.container);
+        event.stopPropagation();
         return false;
     }
-
+    
     /**
      * Fetches a LDP resource of the given IRI
      * If no context given, takes the default one
