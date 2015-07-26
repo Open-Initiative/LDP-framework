@@ -14,6 +14,7 @@ Allowed options:
 * context: iri used as the default json-ld context
 * template: main template, used as a default for render operations
 * partials: other templates to be used in rendering
+* models: objects describing the models of the application, used by forms (See below)
 
 ### Add resource:
 `store.save(object)`
@@ -54,12 +55,19 @@ Only the first parameter is required. For other, the default given in initiatili
 `store.createContainer(containerName, parentContainer)`
 
 ### Form handling
+`{{{form 'mymodel'}}}`
+Renders a form with the model. When submitted, the object is automatically created in the container given in the model.
+
+#### Models
+A model is described by a JSON object, containing possibly a container uri, and a set of fields, each of which containing a title and a name. For the todos used in the example, the model looks like this:
 ```
-<form onSubmit="return store.handleSubmit(event, containerIri);">
-  <input type="text" name="todos:assignee" />
-  <input type="text" name="todos:label" />
-  <input type="submit" />
-</form>
+{'todos': {
+    fields: [
+        {title: "What do you need to do today?", name: "todos:label"},
+        {title: "Who should do it?", name: "todos:assignee"}
+    ],
+    container: "todos/"
+}}
 ```
 
 For more information on how all this works, please check the wiki:
