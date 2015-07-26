@@ -45,7 +45,7 @@ store.list(containerIri).then(function(list) {
 ```
 
 ### Render resource with template
-`store.render('#div', containerIri, '#template-script', context)`
+```store.render('#div', containerIri, '#template-script', context)```
 Only the first parameter is required. For other, the default given in initiatilization will be used.
 
 ### Delete resource
@@ -76,14 +76,17 @@ For more information on how all this works, please check the wiki:
 ##Dependencies
 
 ###Server side
-LDP server
-The application has been tested with RwwPlay!
+You need an LDP server in order to serve data to your application.
+This application has been tested with RwwPlay!
 See https://github.com/Open-Initiative/LDP-Todo-List/wiki/Notes-on-installing-RwwPlay for installation
 
+You can also test read-only templating features with RDF files served by a standard HTTP server.
+
 ###Client side
-* rdf-ext.js
-* rdfi.js
-* jsonld.js
-* N3.js
-* react.js
-* JSXTransformer.js
+* RDF Extenstions
+* RDF-Interface
+* JSON-LD
+* N3
+* JQuery
+* ES6 promises
+* Handlebars
