@@ -34338,7 +34338,8 @@ window.MyStore = function (options) {
     if('template' in options) this.mainTemplate = Handlebars.compile(options.template);
     
     var fieldPartial = "<input type='text' placeholder='{{title}}' name='{{name}}' /><br/>";
-    var formTemplate = Handlebars.compile("<form data-container='{{container}}' onSubmit='return store.handleSubmit(event);'> \
+    var formTemplate = Handlebars.compile(
+        "<form data-container='{{container}}' onSubmit='return store.handleSubmit(event);'> \
             {{#each fields}}{{> LDPField }}{{/each}} \
             <input type='submit' value='Post' /> \
         </form>");
@@ -34347,6 +34348,23 @@ window.MyStore = function (options) {
     if('partials' in options)
         for(var partialName in options.partials)
             Handlebars.registerPartial(partialName, options.partials[partialName]);
+    
+    Handlebars.registerHelper("ldpeach", function(array, tagName, options) {
+        var id = "ldp-"+Math.round(new Date().getTime() + (Math.random() * 10000));
+        var objects = Array.isArray(array) ? array : [array];
+        objects.forEach(function(object) {
+            console.log(object);
+            this.get(object, this.context).then(function(object) {
+                console.log(document.getElementById(id));
+                $('#'+id).append(options.fn(object));
+            }.bind(this));
+        }.bind(this));
+        return '<'+ tagName +' id="'+id+'"></' + tagName + '>';
+    }.bind(this));
+    
+    Handlebars.registerHelper('ldplist', function(obj) {
+        return obj['ldp:contains'];
+    });
     
     Handlebars.registerHelper('form', function(context, options) {
         return formTemplate(this.models[context]);
@@ -34509,21 +34527,13 @@ window.MyStore = function (options) {
         return this.container + iri;
     }
     
-    this.render = function render(div, containerIri, template, context) {
-        var container = this.getIri(containerIri);
+    this.render = function render(div, objectIri, template, context) {
+        var objectIri = this.getIri(objectIri);
         var template = template ? Handlebars.compile(template) : this.mainTemplate;
         var context = context || this.context;
-        var objects = [];
-        $(div).html(template({objects: objects}));
-        
-        this.list(container).then(function(objectlist) {
-            objectlist.forEach(function(object) {
-                this.get(object, context).then(function(object){
-                    objects.push(object);
-                    $(div).html(template({objects: objects}));
-                });
-            }.bind(this));
-        }.bind(this));
+        this.get(objectIri).then(function(object) {
+            $(div).html(template({object: object}));
+        });
     }
     
     /**
