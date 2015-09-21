@@ -44,15 +44,19 @@ store.list(containerIri).then(function(list) {
 });
 ```
 
-### Render resource with template
-```store.render('#div', containerIri, '#template-script', context)```
-Only the first parameter is required. For other, the default given in initiatilization will be used.
-
 ### Delete resource
 `store.delete(objectIri)`
 
 ### Create a container
 `store.createContainer(containerName, parentContainer)`
+
+### Render resource with template
+```store.render('#div', resourceIri, '#template-script', context)```
+Only the first parameter is required. For the others, the default given in initiatilization will be used.
+
+### Asynchronous rendering
+`{{{ldpeach object.ldp:contains "div"}}}`
+Retrives all the resources of the given array, and renders them as they arrive. They are render in an element of the given tag. 
 
 ### Form handling
 `{{{form 'mymodel'}}}`
