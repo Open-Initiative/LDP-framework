@@ -80,10 +80,6 @@ window.MyStore = function (options) {
         return '<'+ tagName +' id="'+id+'"></' + tagName + '>';
     }.bind(this));
     
-    Handlebars.registerHelper('ldplist', function(obj) {
-        return obj['ldp:contains'];
-    });
-    
     Handlebars.registerHelper('form', function(context, options) {
         return formTemplate(this.models[context]);
     }.bind(this));
