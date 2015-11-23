@@ -34337,7 +34337,7 @@ window.MyStore = function (options) {
     this.models         = options.models;
     if('template' in options) this.mainTemplate = Handlebars.compile(options.template);
 
-    var fieldPartial = "<input type='text' placeholder='{{title}}' name='{{name}}' /><br/>";
+    var fieldPartial = "<label>{{title}}</label><input id='{{name}}' type='text' placeholder='{{title}}' name='{{name}}' /><br/>";
     var formTemplate = Handlebars.compile(
         "<form data-container='{{container}}' onSubmit='return store.handleSubmit(event);'> \
             {{#each fields}}{{> LDPField }}{{/each}} \
