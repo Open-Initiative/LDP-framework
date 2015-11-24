@@ -34537,7 +34537,11 @@ window.MyStore = function (options) {
             if (fields) {
               fields.forEach( function(fields) {
                 var propertyName = fields.name;
-                fields.fieldValue = object[propertyName.replace(prefix, '')];
+                if (prefix) {
+                  propertyName = propertyName.replace(prefix, '');
+                }
+
+                fields.fieldValue = object[propertyName];
               });
             }
             $(div).html(template({object: object}));
