@@ -34337,7 +34337,7 @@ window.MyStore = function (options) {
     this.models         = options.models;
     if('template' in options) this.mainTemplate = Handlebars.compile(options.template);
 
-    var fieldPartial = "<label>{{title}}</label><input id='{{name}}' type='text' placeholder='{{title}}' name='{{name}}' /><br/>";
+    var fieldPartial = "<label>{{title}}</label><input id='{{name}}' type='text' placeholder='{{title}}' name='{{name}}' value='{{fieldValue}}' /><br/>";
     var formTemplate = Handlebars.compile(
         "<form data-container='{{container}}' onSubmit='return store.handleSubmit(event);'> \
             {{#each fields}}{{> LDPField }}{{/each}} \
@@ -34527,11 +34527,19 @@ window.MyStore = function (options) {
         return this.container + iri;
     }
 
-    this.render = function render(div, objectIri, template, context) {
+    this.render = function render(div, objectIri, template, context, modelName, prefix) {
         var objectIri = this.getIri(objectIri);
         var template = template ? Handlebars.compile(template) : this.mainTemplate;
         var context = context || this.context;
+        var fields = modelName ? this.models[modelName].fields : null;
+
         this.get(objectIri).then(function(object) {
+            if (fields) {
+              fields.forEach( function(fields) {
+                var propertyName = fields.name;
+                fields.fieldValue = object[propertyName.replace(prefix, '')];
+              });
+            }
             $(div).html(template({object: object}));
         });
     }
