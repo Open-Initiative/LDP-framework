@@ -3,6 +3,7 @@
   min-height: 400px;
   background: url(http://i.stack.imgur.com/ynxjD.png) repeat-y;
   position: relative;
+  float: left;
 }
 
 #todolist {

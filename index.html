@@ -1,86 +1,57 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <link rel="stylesheet" type="text/css" href="todostyle.css">
-    <script type="text/javascript" src="jquery.min.js"></script>
-    <script type="text/javascript" src="mystore.js"></script>
-    
-    <script id="profile-template" type="text/x-handlebars-template">
-        <div>{{about.name}}: {{about.description}}</div>
-    </script>
-        
-    <script id="main-template" type="text/x-handlebars-template">
-        People:
-        <div id="people">
-            {{#each objects}} {{> profile }}{{/each}}
-        </div>
-    </script>
-    
-    <script id="select-template" type="text/x-handlebars-template">
-	Assignee:
-    	<select name="Assignee">
-	    {{#each objects}} {{> assignee}}{{/each}}
-    	</select>
-    </script>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" type="text/css" href="todostyle.css" />
+        <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
+        <script type="text/javascript" src="mystore.js"></script>
 
-    <script id="assignee-template" type="text/x-handlebars-template">
-	<option name="assignee-name">{{about.name}}</option>
-    </script>
+        <script id="profile-template" type="text/x-handlebars-template">
+            <div>{{about.name}}: {{about.description}}</div>
+        </script>
+        <script id="people-template" type="text/x-handlebars-template">
+            People:
+            <div id="people">
+                    {{#ldpeach object.ldp:contains "div"}}{{> profile }}{{/ldpeach}}
+            </div>
+        </script>
 
-    <script>
-        $(function(){
-            window.store = new MyStore({
-                container: "https://localhost:8443/2013/people/",
-                context: "http://ld.hackers4peace.net/contexts/plp.jsonld",
-                template: $("#main-template").html(),
-                partials: {'profile': $("#profile-template").html()},
+        <script id="todo-template" type="text/x-handlebars-template">
+            <div className="todo">
+                <h4>{{todos:label}}</h4>
+                {{todos:assignee}}
+            </div>
+        </script>
+        <script id="todolist-template" type="text/x-handlebars-template">
+            <h2>Todo List!</h2>
+            {{#ldpeach object.ldp:contains "div"}}{{> todo }}{{/ldpeach}}
+            <h4>Add a new task</h4>
+            {{{form 'todos'}}}
+        </script>
+
+        <script>
+            $(function(){
+                window.store = new MyStore({
+                    container: document.location.hash.slice(1)||"https://ldp.openinitiative.com:8443/2013/",
+                    context: "http://owl.openinitiative.com/oicontext.jsonld",
+                    template: $("#people-template").html(),
+                    partials: {'profile': $("#profile-template").html(), 'todo': $("#todo-template").html()},
+                    models: {'todos': {fields: [{title: "What do you need to do today?", name: "todos:label"}, {title: "Who should do it?", name: "todos:assignee"}], container: "todos/"}},
+                });
+                store.render("#profilebrowser", "people/");
+                store.render("#todolist", "todos/", $("#todolist-template").html());
             });
-            store.render("#profilebrowser");
+        </script>
+    </head>
+    <body>
+        <div id="todolistcontainer">
+            <div id="todolist">
+            </div>
+        </div>
 
-	    //Render the people list in the select assignee form field.
-	    store2 = new MyStore({
-                container: "https://localhost:8443/2013/people/",
-                context: "http://ld.hackers4peace.net/contexts/plp.jsonld",
-	    	template: $("#select-template").html(),
-		partials: {'assignee': $("#assignee-template").html()},
-	    });
-	    store2.render("#assigneeselect");
-	    
-        });
-
-	//Create a new element in the store and refresh the list
-	function addNewPeople() {
-	    var name = $('#name').val();
-	    var description = $('#description').val();
-	    var data =  {"@context": "http://ld.hackers4peace.net/contexts/plp.jsonld", about: {name:name, description: description}};
-	    window.store.save(data);
-	    window.store.render("#profilebrowser");
-	};
-	
-        //Create a new element in the Todos and refresh the list
-	function addNewTodo() {
-	    var label = $('#label').val();
-	    var assignee = $('#assignee').val();
-	    var data =  {"@context": "http://localhost:8443/contexts/plp.jsonld", about: {assignee:assignee, label: label}};
-	    window.store.save(data);
-	    window.store.render("#profilebrowser");
-	};
-    </script>
-  </head>
-  <body>
-    <div id="profilebrowsercontainer">
-      <div id="profilebrowser">
-      </div>
-    </div>
-    <h2>Create a new People</h2>
-    <input type="text" id="name" name="name" placeholder="Ton nom" />
-    <input type="text" id="description" name="description" placeholder="Ta description" />
-    <button onclick="javascript:addNewPeople();">Valider</button>
-
-    <h2>Create a new Task</h2>
-    <div id="assigneeselect"></div>
-    <input type="text" id="label" name="label" placeholder="What to do ?">
-    <button onclick="javascript:addNewTodo();">Valider</button>
-  </body>
+        <div id="profilebrowsercontainer">
+            <div id="profilebrowser">
+            </div>
+        </div>
+    </body>
 </html>

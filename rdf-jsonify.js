@@ -54,21 +54,43 @@ window.MyStore = function (options) {
     options             = options || {};
     this.container      = options.container;
     this.context        = options.context;
-    this.mainTemplate   = Handlebars.compile(options.template);
+    this.models         = options.models;
+    if('template' in options) this.mainTemplate = Handlebars.compile(options.template);
+    
+    var fieldPartial = "<input type='text' placeholder='{{title}}' name='{{name}}' /><br/>";
+    var formTemplate = Handlebars.compile(
+        "<form data-container='{{container}}' onSubmit='return store.handleSubmit(event);'> \
+            {{#each fields}}{{> LDPField }}{{/each}} \
+            <input type='submit' value='Post' /> \
+        </form>");
+    
+    Handlebars.registerPartial("LDPField", fieldPartial);
     if('partials' in options)
         for(var partialName in options.partials)
             Handlebars.registerPartial(partialName, options.partials[partialName]);
     
+    Handlebars.registerHelper("ldpeach", function(array, tagName, options) {
+        var id = "ldp-"+Math.round(new Date().getTime() + (Math.random() * 10000));
+        var objects = Array.isArray(array) ? array : [array];
+        objects.forEach(function(object) {
+            this.get(object, this.context).then(function(object) {
+                $('#'+id).append(options.fn(object));
+            }.bind(this));
+        }.bind(this));
+        return '<'+ tagName +' id="'+id+'"></' + tagName + '>';
+    }.bind(this));
+    
+    Handlebars.registerHelper('form', function(context, options) {
+        return formTemplate(this.models[context]);
+    }.bind(this));
+    
     var storeOptions = {};
-    if ('corsProxy' in options) {
-        storeOptions.request = rdf.corsProxyRequest.bind(rdf, options.corsProxy)
-    }
-    var store = options.store ||  new rdf.promise.Store(new rdf.LdpStore(storeOptions));
+    if ('corsProxy' in options)
+        storeOptions.request = rdf.corsProxyRequest.bind(rdf, options.corsProxy);
 
-    var
+    var store = options.store || new rdf.promise.Store(new rdf.LdpStore(storeOptions)),
         parser = new rdf.promise.Parser(new rdf.JsonLdParser()),
-        serializer = new rdf.promise.Serializer(new rdf.JsonLdSerializer()),
-        routedContexts = {};
+        serializer = new rdf.promise.Serializer(new rdf.JsonLdSerializer());
 
     // returns the document part of an hash IRI
     var documentIri = function (iri) {
@@ -76,22 +98,32 @@ window.MyStore = function (options) {
     };
 
     // parse iri + object arguments
+    //TODO: clean up argument syntax
     var parseIriObjectsArgs = function (args) {
+        if (typeof args[1] === 'string') {
+            return {
+                'headers': args[0],
+                'iri': args[1],
+                'objects': Array.prototype.slice.call(args).slice(2)
+            };
+        }
         if (typeof args[0] === 'string') {
             return {
                 'iri': args[0],
+                'headers': undefined,
                 'objects': Array.prototype.slice.call(args).slice(1)
             };
         }
 
         return {
             'iri': '@id' in args[0] ? args[0]['@id'] : null,
+            'headers': undefined,
             'objects': Array.prototype.slice.call(args).slice()
         };
     };
 
     // merges multiple JSON-LD objects into a single graph
-    var objectsToGraph = function (iri, objects) {
+    this.objectsToGraph = function objectsToGraph(iri, objects) {
         var
             graph = rdf.createGraph(),
             parseAll = [];
@@ -104,7 +136,7 @@ window.MyStore = function (options) {
             // use context routing of no context is defined
             if (!('@context' in object)) {
                 object = JSON.parse(JSON.stringify(object));
-                object['@context'] = findContext(iri);
+                object['@context'] = this.context;
             }
 
             // use IRI if no id is defined
@@ -113,55 +145,10 @@ window.MyStore = function (options) {
             }
 
             parseAll.push(parser.parse(object, iri).then(addToGraph));
-        });
+        }.bind(this));
 
         return Promise.all(parseAll)
             .then(function () { return graph; });
-    };
-
-    // find a routing based context
-    var findContext = function (iri) {
-        for (var key in routedContexts) {
-            var route = routedContexts[key];
-
-            if ('startsWith' in route && iri.indexOf(route.startsWith) === 0) {
-                return route.context;
-            }
-
-            if ('regexp' in route && route.regexp.test(iri)) {
-                return route.context;
-            }
-        }
-
-        return {};
-    };
-
-    /**
-     * Fetches a JSON-LD object of the given IRI
-     * If no context is given, it will try to get the context via routing,
-     *
-     * @param {String} iri IRI of the named graph
-     * @param {Object} [context] JSON-LD context to compact the graph
-     * @returns {Promise}
-     */
-    this.get = function get(object, context) {
-        var iri;
-        if (typeof object === 'string') {
-                iri = object;
-        } else {
-                iri = object['@id'];
-        }
-        if (context == null) {
-            context = findContext(iri);
-        }
-
-        return store.graph(documentIri(iri), {'useEtag': true})
-            .then(function(graph) {this.etags[iri]=graph.etag;return serializer.serialize(graph)}.bind(this))
-            .then(function (expanded) { return JsonLdUtils.frame(expanded, {}); })
-            .then(function (framed) {
-                var frame = framed['@graph'].reduce(function (p, c) { return (c['@id'] == iri ? c : p); }, {});
-                return JsonLdUtils.compact(frame, context);
-            });
     };
 
     //TODO: find out why ids get messed up
@@ -173,7 +160,51 @@ window.MyStore = function (options) {
         return o;
     }
 
-    this.save = function save(object) {
+    this.reduceForm = function reduceForm(form) {
+        return $(form).serializeArray().reduce(function(obj, field){
+            obj[field.name] = field.value; return obj
+        }, {});
+    };
+    
+    this.handleSubmit = function handleSubmit(event) {
+        this.save(this.reduceForm(event.target), event.target.dataset.container);
+        event.stopPropagation();
+        return false;
+    }
+    
+    /**
+     * Fetches a LDP resource of the given IRI
+     * If no context given, takes the default one
+     *
+     * @param {String} iri IRI of the named graph
+     * @param {Object} [context] JSON-LD context to compact the graph
+     * @returns {Promise}
+     */
+    this.get = function get(object, context) {
+        var iri;
+        if (typeof object === 'string') {
+            iri = object;
+        } else {
+            this.resetId(object);
+            iri = object['@id'];
+        }
+        context = context || this.context;
+
+        return store.graph(documentIri(iri), {'useEtag': true})
+            .then(function(graph) {this.etags[iri]=graph.etag;return serializer.serialize(graph)}.bind(this))
+            .then(function (expanded) { return JsonLdUtils.frame(expanded, {}); })
+            .then(function (framed) {
+                var frame = framed['@graph'].reduce(function (p, c) { return (c['@id'] == iri ? c : p); }, {});
+                return JsonLdUtils.compact(frame, context);
+            });
+    };
+    
+    this.createContainer = function createContainer(containerName, parentIri) {
+        var container = {'@type': 'ldp:BasicContainer'};
+        this.add({'Slug': containerName, 'Link': '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"'}, this.getIri(parentIri), container);
+    }
+    
+    this.save = function save(object, container) {
         this.resetId(object);
         if(!('@context' in object))
             object['@context'] = this.context;
@@ -181,12 +212,15 @@ window.MyStore = function (options) {
         if('@id' in object)
             this.put(object);
         else
-            this.add(this.container, object);
+            this.add(this.getIri(container), object);
     }
     
     this.list = function list(containerIri) {
         return this.get(containerIri).then(function(container) {
-            return container['http://www.w3.org/ns/ldp#contains'];
+            var objectList = container['ldp:contains'] || [];
+            if('@id' in objectList)
+                objectList = [objectList];
+            return objectList;
         });
     }
     
@@ -201,20 +235,19 @@ window.MyStore = function (options) {
         }.bind(this));
     }
     
-    this.render = function render(div, containerIri, template, context) {
-        var container = containerIri || this.container;
-        var template = template || this.mainTemplate;
+    this.getIri = function getIri(iri) {
+        if(!iri) return this.container;
+        if(iri.startsWith("http://")||iri.startsWith("https://")) return iri;
+        return this.container + iri;
+    }
+    
+    this.render = function render(div, objectIri, template, context) {
+        var objectIri = this.getIri(objectIri);
+        var template = template ? Handlebars.compile(template) : this.mainTemplate;
         var context = context || this.context;
-        var objects = [];
-        
-        this.list(container).then(function(objectlist) {
-            objectlist.forEach(function(object) {
-                this.get(object, context).then(function(object){
-                    objects.push(object);
-                    $(div).html(template({objects: objects}));
-                });
-            }.bind(this));
-        }.bind(this));
+        this.get(objectIri).then(function(object) {
+            $(div).html(template({object: object}));
+        });
     }
     
     /**
@@ -227,8 +260,8 @@ window.MyStore = function (options) {
     this.add = function () {
         var param = parseIriObjectsArgs(arguments);
         
-        return objectsToGraph("", param.objects)
-            .then(function (graph) { graph.etag=this.etags[param.iri];return store.add(documentIri(param.iri), graph, {'useEtag': true, 'method': 'POST'}); }.bind(this))
+        return this.objectsToGraph("", param.objects)
+            .then(function (graph) { return store.add(documentIri(param.iri), graph, {'method': 'POST', 'headers': param.headers}); }.bind(this))
             .then(function (added, error) {
                 return new Promise(function (resolve, reject) {
                     if (error != null) {
@@ -253,7 +286,7 @@ window.MyStore = function (options) {
     this.put = function () {
         var param = parseIriObjectsArgs(arguments);
         
-        return objectsToGraph(param.iri, param.objects)
+        return this.objectsToGraph(param.iri, param.objects)
             .then(function (graph) { graph.etag=this.etags[param.iri];return store.add(documentIri(param.iri), graph, {'useEtag': true}); }.bind(this))
             .then(function (added, error) {
                 return new Promise(function (resolve, reject) {
@@ -280,7 +313,7 @@ window.MyStore = function (options) {
     this.patch = function () {
         var param = parseIriObjectsArgs(arguments);
 
-        return objectsToGraph(param.iri, param.objects)
+        return this.objectsToGraph(param.iri, param.objects)
             .then(function (graph) { return store.merge(documentIri(param.iri), graph); })
             .then(function (merged, error) {
                 return new Promise(function (resolve, reject) {
@@ -324,132 +357,5 @@ window.MyStore = function (options) {
                     resolve();
                 });
             });
-    };
-
-    /**
-     * Assigns a JSON-LD context to a route
-     *
-     * @param {String|RegExp} path Path the IRI starts with or a RegExp to test
-     * @param {Object} context JSON-LD context to compact the graph
-     * @returns {JSONify}
-     */
-    this.addContext = function (path, context) {
-        if (typeof path === 'string') {
-            routedContexts[path] = {
-                'startsWith': path,
-                'context': context
-            };
-        } else if (path instanceof RegExp) {
-            routedContexts[path] = {
-                'regexp': path,
-                'context': context
-            };
-        }
-
-        return this;
-    };
-};
-
-
-/**
- * RESTful cached read only interface for RDF-Ext Store using JSON-LD
- *
- * @param JSONify
- * @param {Object} [options]
- * @constructor
- */
-rdf.CachedJSONify = function (JSONify, options) {
-    if (options == null) {
-        options = {};
-    }
-
-    if (JSONify == null) {
-        JSONify = new rdf.JSONify(null, options);
-    }
-
-    var
-        cache = {},
-        queue = {};
-
-    var enqueue = function (iri, context, callback) {
-        if (iri in queue) {
-            queue[iri].push(callback);
-        } else {
-            queue[iri] = [callback];
-
-            JSONify.get(iri, context).then(function (data) {
-                cache[iri] = data;
-
-                for (var i = 0; i < queue[iri].length; i++) {
-                    queue[iri][i](data);
-                }
-            });
-        }
-    };
-
-    /**
-     * Fetches a JSON-LD object of the given IRI
-     *
-     * @param {String} iri IRI of the named graph
-     * @param {Object} [context] JSON-LD context to compact the graph
-     * @param {Function} callback Callback function if object isn't cached
-     * @returns {Object}
-     */
-    this.get = function (iri) {
-        var
-            context = null,
-            callback = arguments[arguments.length - 1];
-
-        if (iri in cache) {
-            return cache[iri];
-        }
-
-        if (arguments.length === 3) {
-            context = arguments[1];
-        }
-
-        enqueue(iri, context, callback);
-
-        return null;
-    };
-
-    /**
-     * Clears the complete cache or if given for a single IRI
-     *
-     * @param {String} [iri] The IRI to clear
-     * @returns {CachedJSONify}
-     */
-    this.clear = function (iri) {
-        if (iri != null) {
-            // clear object cache
-            if (iri in cache) {
-                delete cache[iri];
-            }
-
-            // clear queued callbacks
-            if (iri in queue) {
-                delete queue[iri];
-            }
-        } else {
-            cache = {};
-            queue = {};
-        }
-
-        return this;
-    };
-
-    /**
-     * Assigns a JSON-LD context to a route
-     *
-     * See JSONify.addContext documentation
-     *
-     * @param {String|RegExp} path Path the IRI starts with or a RegExp to test
-     * @param {Object} context JSON-LD context to compact the graph
-     * @returns {CachedJSONify}
-     */
-    this.addContext = function (path, context) {
-        JSONify.addContext(path, context);
-
-        return this;
     };
 };
