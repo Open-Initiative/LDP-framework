@@ -34340,11 +34340,7 @@ window.MyStore = function (options) {
     // The partial definition for displaying a form field
     var fieldPartial = "<label for='{{name}}'>{{title}}</label> \
                         {{#ifCond type 'textarea'}} \
-                          <textarea id='{{name}}' name='{{name}}' rows='20'> \
-                          {{#if fieldValue}} \
-                            {{fieldValue}} \
-                          {{/if}} \
-                        </textarea><br/>\
+                          <textarea id='{{name}}' name='{{name}}' rows='10'>{{#if fieldValue}}{{fieldValue}}{{/if}}</textarea><br/>\
                         {{else}}\
                           {{#ifCond type 'checkbox'}} \
                             <input type='checkbox' name='{{name}}' id='{{name}}'/>\
