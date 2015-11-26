@@ -34337,14 +34337,42 @@ window.MyStore = function (options) {
     this.models         = options.models;
     if('template' in options) this.mainTemplate = Handlebars.compile(options.template);
 
-    var fieldPartial = "<label>{{title}}</label><input id='{{name}}' type='text' placeholder='{{title}}' name='{{name}}' value='{{fieldValue}}' /><br/>";
+    // The partial definition for displaying a form field
+    var fieldPartial = "<label for='{{name}}'>{{title}}</label> \
+                        {{#ifCond type 'textarea'}} \
+                          <textarea id='{{name}}' name='{{name}}' rows='20'> \
+                          {{#if fieldValue}} \
+                            {{fieldValue}} \
+                          {{/if}} \
+                        </textarea><br/>\
+                        {{else}}\
+                          {{#ifCond type 'checkbox'}} \
+                            <input type='checkbox' name='{{name}}' id='{{name}}'/>\
+                          {{else}}\
+                            {{#ifCond type 'select'}} \
+                              <select id='{{name}}' name='{{name}}'> \
+                                {{#each options}}{{> LDPOptions fieldValue='{{fieldValue}}' }}{{/each}} \
+                            {{else}} \
+                              <input id='{{name}}' type='text' placeholder='{{title}}' name='{{name}}' value='{{fieldValue}}' />\
+                            {{/ifCond}}\
+                          {{/ifCond}}\
+                        {{/ifCond}}";
+    Handlebars.registerPartial("LDPField", fieldPartial);
+
+    // The partial definition for displaying an option field inside a select
+    var optionPartial = "{{#ifCond value fieldValue}} \
+                          <option value='{{value}}' selected>{{name}}</option>\
+                        {{else}}\
+                          <option value='{{value}}'>{{name}}</option>\
+                        {{/ifCond}}";
+    Handlebars.registerPartial("LDPOptions", optionPartial);
+
     var formTemplate = Handlebars.compile(
         "<form data-container='{{container}}' onSubmit='return store.handleSubmit(event);'> \
             {{#each fields}}{{> LDPField }}{{/each}} \
             <input type='submit' value='Post' /> \
         </form>");
 
-    Handlebars.registerPartial("LDPField", fieldPartial);
     if('partials' in options)
         for(var partialName in options.partials)
             Handlebars.registerPartial(partialName, options.partials[partialName]);
@@ -34364,6 +34392,14 @@ window.MyStore = function (options) {
 
     Handlebars.registerHelper('ldplist', function(obj) {
         return obj['ldp:contains'];
+    });
+
+    Handlebars.registerHelper('ifCond', function(value, tester, options) {
+      if (value == tester) {
+        return options.fn(this);
+      } else {
+        return options.inverse(this);
+      }
     });
 
     Handlebars.registerHelper('form', function(context, options) {
