@@ -4,6 +4,29 @@ Simple framework for LDP achitectures
 This javascript framework enables you to build an application based on the LDP architecture.
 Just create js objects and forget about the server. The framework handles that for you!
 
+## Installation process (for developers)
+If you would like to contribute, please note that the main file (mystore.js) is compiled (and minified ?) using Browserify.
+
+So if you fork the project, all modifications/contributions should be done in the non-compiled sources. The main source file is the ldpstore.js one, containing the MyStore class.
+
+To compile the sources, you will need to install all the dependencies using NPM.
+To be able able to compile, first install NodeJS and NPM
+`sudo apt-get install nodejs npm`
+
+Then, launch the installation of all the dependencies using:
+`npm install`
+
+This command should create a node_modules folders containing the sources of all the dependencies listed in the package.json file (locate at the root of the project).
+If you got error about the node command unknown (useful on Ubuntu for example) you will need to create an alias from the nodejs command to the node one:
+`sudo ln -s /usr/bin/nodejs /usr/bin/node`
+
+Then, install browserify:
+`sudo npm install -g browserify`
+
+Browserify will allow you to compile the sources right after you made modifications, to test on the compiled version and keep a setup close to production.
+To compile the sources, use the following command:
+`browserify ldpstore.js -o mystore.js`
+
 ##Features
 See index.html as an example.
 
