@@ -10,22 +10,32 @@ If you would like to contribute, please note that the main file (mystore.js) is 
 So if you fork the project, all modifications/contributions should be done in the non-compiled sources. The main source file is the ldpstore.js one, containing the MyStore class.
 
 To compile the sources, you will need to install all the dependencies using NPM.
-To be able able to compile, first install NodeJS and NPM
-`sudo apt-get install nodejs npm`
+To be able able to compile, first install NodeJS and NPM:
+```
+sudo apt-get install nodejs npm
+```
 
-Then, launch the installation of all the dependencies using:
-`npm install`
+Then, launch the installation of all the dependencies from the root of the project folder using:
+```
+npm install
+```
 
 This command should create a node_modules folders containing the sources of all the dependencies listed in the package.json file (locate at the root of the project).
 If you got error about the node command unknown (useful on Ubuntu for example) you will need to create an alias from the nodejs command to the node one:
-`sudo ln -s /usr/bin/nodejs /usr/bin/node`
+```
+sudo ln -s /usr/bin/nodejs /usr/bin/node
+```
 
 Then, install browserify:
-`sudo npm install -g browserify`
+```
+sudo npm install -g browserify
+```
 
 Browserify will allow you to compile the sources right after you made modifications, to test on the compiled version and keep a setup close to production.
 To compile the sources, use the following command:
-`browserify ldpstore.js -o mystore.js`
+```
+browserify ldpstore.js -o mystore.js
+```
 
 ##Features
 See index.html as an example.
