@@ -1,21 +1,21 @@
 {
-  "name": "LDP-Todo-List",
+  "name": "LDP-framework",
   "version": "0.0.1",
-  "description": "Tutorial on creating a Todo List for LDP achitectures",
+  "description": "Library for manipulating objects compatible with a LDP achitectures",
   "main": "LdpStore.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Open-Initiative/LDP-Todo-List.git"
+    "url": "https://github.com/Open-Initiative/LDP-framework.git"
   },
   "author": "Sylvain Le Bon",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Open-Initiative/LDP-Todo-List/issues"
+    "url": "https://github.com/Open-Initiative/LDP-framework/issues"
   },
-  "homepage": "https://github.com/Open-Initiative/LDP-Todo-List",
+  "homepage": "https://github.com/Open-Initiative/LDP-framework",
   "dependencies": {
     "es6-promise": "^2.2.0",
     "handlebars": "^3.0.3",

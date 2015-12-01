@@ -5,7 +5,7 @@
         <link rel="stylesheet" type="text/css" href="todostyle.css" />
         <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
         <script type="text/javascript" src="mystore.js"></script>
-        
+
         <script id="profile-template" type="text/x-handlebars-template">
             <div>{{about.name}}: {{about.description}}</div>
         </script>
@@ -15,7 +15,7 @@
                     {{#ldpeach object.ldp:contains "div"}}{{> profile }}{{/ldpeach}}
             </div>
         </script>
-        
+
         <script id="todo-template" type="text/x-handlebars-template">
             <div className="todo">
                 <h4>{{todos:label}}</h4>
@@ -28,7 +28,7 @@
             <h4>Add a new task</h4>
             {{{form 'todos'}}}
         </script>
-        
+
         <script>
             $(function(){
                 window.store = new MyStore({
@@ -48,7 +48,7 @@
             <div id="todolist">
             </div>
         </div>
-    
+
         <div id="profilebrowsercontainer">
             <div id="profilebrowser">
             </div>
