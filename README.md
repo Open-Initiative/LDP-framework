@@ -56,7 +56,7 @@ Only the first parameter is required. For the others, the default given in initi
 
 ### Asynchronous rendering
 `{{{ldpeach object.ldp:contains "div"}}}`
-Retrives all the resources of the given array, and renders them as they arrive. They are render in an element of the given tag. 
+Retrives all the resources of the given array, and renders them as they arrive. They are render in an element of the given tag.
 
 ### Form handling
 `{{{form 'mymodel'}}}`
@@ -109,6 +109,19 @@ To compile the sources, use the following command:
 ```
 browserify ldpstore.js -o mystore.js
 ```
+
+You can also use Grunt to watch the changes and process automatic compiling while working. To be able to use Grunt, please install it using
+
+```
+sudo npm install -g grunt-cli
+```
+Then, using the following command:
+
+```
+grunt watch
+```
+
+From the project root folder, you should see that any changes to the source ldpstore.js should be compiled into the mystore.js file.
 
 ##Dependencies
 
