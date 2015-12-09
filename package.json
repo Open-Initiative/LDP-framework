@@ -24,5 +24,14 @@
     "n3": "^0.4.3",
     "rdf-ext": "^0.2.4",
     "rdf-interfaces": "^0.1.1"
+<<<<<<< HEAD
+=======
+  },
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-browserify": "~4.0.1",
+    "grunt-contrib-jshint": "~0.11.3",
+    "grunt-contrib-watch": "~0.6.1"
+>>>>>>> 8fe517f... Adding everything to be able to watch the changes and add automatic compiling
   }
 }
