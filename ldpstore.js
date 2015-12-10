@@ -55,6 +55,7 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
      this.container      = options.container;
      this.context        = options.context;
      this.models         = options.models;
+
      if('template' in options) this.mainTemplate = Handlebars.compile(options.template);
 
      // The partial definition for displaying a form field
@@ -277,6 +278,12 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
          if(!iri) return this.container;
          if(iri.startsWith("http://")||iri.startsWith("https://")) return iri;
          return this.container + iri;
+     }
+
+     this.renderFromArray = function renderFromArray(divName, resourcesArray, templateName) {
+       var template = templateName ? Handlebars.compile($(templateName).html()) : this.mainTemplate;
+       var pointer = this;
+       $(divName).html(template({object: resourcesArray}));
      }
 
      this.render = function render(div, objectIri, template, context, modelName, prefix) {
