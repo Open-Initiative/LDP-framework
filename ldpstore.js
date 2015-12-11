@@ -280,18 +280,8 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
          return this.container + iri;
      }
 
-     this.renderFromArray = function renderFromArray(divName, object, templateName, propertyName) {
+     this.renderFromArray = function renderFromArray(divName, resourcesArray, templateName) {
        var template = templateName ? Handlebars.compile($(templateName).html()) : this.mainTemplate;
-       var resourcesArray = [];
-       var index = 0;
-       for (var property in object) {
-         if (object.hasOwnProperty(property)) {
-           if (property.contains(propertyName) && object[property]) {
-             resourcesArray[index] = {'@id': object[property]};
-             index++;
-           }
-         }
-       }
        $(divName).html(template({object: resourcesArray}));
      }
 
