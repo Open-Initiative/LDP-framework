@@ -280,6 +280,11 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
          return this.container + iri;
      }
 
+     this.renderFromArray = function renderFromArray(divName, resourcesArray, templateName) {
+       var template = templateName ? Handlebars.compile($(templateName).html()) : this.mainTemplate;
+       $(divName).html(template({object: resourcesArray}));
+     }
+
      this.render = function render(div, objectIri, template, context, modelName, prefix) {
          var objectIri = this.getIri(objectIri);
          var template = template ? Handlebars.compile(template) : this.mainTemplate;
