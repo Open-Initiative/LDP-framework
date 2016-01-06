@@ -55,6 +55,7 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
      this.container      = options.container;
      this.context        = options.context;
      this.models         = options.models;
+
      if('template' in options) this.mainTemplate = Handlebars.compile(options.template);
 
      // The partial definition for displaying a form field
