@@ -103,7 +103,6 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
                  Handlebars.registerPartial(partialName, data);
              }
          });
-         count++;
      }
 
      Handlebars.registerHelper("ldpeach", function(array, tagName, options) {
