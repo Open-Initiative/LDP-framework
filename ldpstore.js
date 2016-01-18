@@ -56,7 +56,7 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
      this.context        = options.context;
      this.models         = options.models;
 
-     if('template' in options) this.mainTemplate = Handlebars.compile(options.template);
+     if('template' in options) this.mainTemplate = options.template;
 
      // The partial definition for displaying a form field
      var fieldPartial = "<label for='{{name}}'>{{title}}</label> \
@@ -90,15 +90,26 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
              <input type='submit' value='Post' /> \
          </form>");
 
-     if('partials' in options)
-         for(var partialName in options.partials)
-             Handlebars.registerPartial(partialName, options.partials[partialName]);
+     if('partials' in options) {
+       for(var partialName in options.partials) {
+         registerPartialFromFile(partialName, options.partials[partialName]);
+       }
+     }
+
+     function registerPartialFromFile(partialName, partialTemplatePath) {
+         $.ajax({
+             url: partialTemplatePath,
+             success: function (data) {
+                 Handlebars.registerPartial(partialName, data);
+             }
+         });
+         count++;
+     }
 
      Handlebars.registerHelper("ldpeach", function(array, tagName, options) {
          var id = "ldp-"+Math.round(new Date().getTime() + (Math.random() * 10000));
          var objects = Array.isArray(array) ? array : [array];
          objects.forEach(function(object) {
-             console.log(object);
              this.get(object, this.context).then(function(object) {
                  console.log(document.getElementById(id));
                  $('#'+id).append(options.fn(object));
@@ -280,16 +291,12 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
          return this.container + iri;
      }
 
-     this.renderFromArray = function renderFromArray(divName, resourcesArray, templateName) {
-       var template = templateName ? Handlebars.compile($(templateName).html()) : this.mainTemplate;
-       $(divName).html(template({object: resourcesArray}));
-     }
-
      this.render = function render(div, objectIri, template, context, modelName, prefix) {
          var objectIri = this.getIri(objectIri);
-         var template = template ? Handlebars.compile(template) : this.mainTemplate;
+         var template = template ? template : this.mainTemplate;
          var context = context || this.context;
          var fields = modelName ? this.models[modelName].fields : null;
+         var instance = this;
 
          this.get(objectIri).then(function(object) {
              if (fields) {
@@ -302,9 +309,32 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
                  fields.fieldValue = object[propertyName];
                });
              }
-             $(div).html(template({object: object}));
+
+             instance.getTemplateAjax(template, function(template) {
+                 $(div).html(template({object: object}));
+             })
          });
      }
+
+     this.renderFromArray = function renderFromArray(divName, resourcesArray, templateName) {
+       var templateName = templateName ? templateName : this.mainTemplate;
+       this.getTemplateAjax(templateName, function(template) {
+           $(divName).html(template({object: resourcesArray}));
+       })
+     }
+
+      // render handlebars templates via ajax
+      this.getTemplateAjax = function getTemplateAjax(path, callback) {
+        var source, template;
+        $.ajax({
+            url: path,
+            success: function (data) {
+                source = data;
+                template = Handlebars.compile(source);
+                if (callback) callback(template);
+            }
+        });
+      }
 
     /**
      * Adds one or more JSON-LD objects to the given IRI
