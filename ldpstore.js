@@ -70,7 +70,19 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
                                <select id='{{name}}' name='{{name}}'> \
                                  {{#each options}}{{> LDPOptions fieldValue='{{fieldValue}}' }}{{/each}} \
                              {{else}} \
-                               <input id='{{name}}' type='text' placeholder='{{title}}' name='{{name}}' value='{{fieldValue}}' />\
+                               {{#ifCond type 'date'}} \
+                                <input id='{{name}}' type='date' placeholder='YYYY-MM-DD' name='{{name}}' value='{{fieldValue}}' />\
+                               {{else}} \
+                                 {{#ifCond type 'url'}} \
+                                  <input id='{{name}}' type='url' placeholder='http://www.example.com' name='{{name}}' value='{{fieldValue}}' />\
+                                 {{else}} \
+                                   {{#ifCond type 'email'}} \
+                                    <input id='{{name}}' type='email' placeholder='contact@example.com' name='{{name}}' value='{{fieldValue}}' />\
+                                   {{else}} \
+                                    <input id='{{name}}' type='text' placeholder='{{title}}' name='{{name}}' value='{{fieldValue}}' />\
+                                   {{/ifCond}}\
+                                 {{/ifCond}}\
+                               {{/ifCond}}\
                              {{/ifCond}}\
                            {{/ifCond}}\
                          {{/ifCond}}";
@@ -293,6 +305,7 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
 
          this.get(objectIri).then(function(object) {
              if (fields) {
+               console.log(fields);
                fields.forEach( function(fields) {
                  var propertyName = fields.name;
                  if (prefix) {
@@ -300,6 +313,8 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
                  }
 
                  fields.fieldValue = object[propertyName];
+                 console.log(fields.fieldValue);
+                 console.log(object[propertyName]);
                });
              }
              $(div).html(template({object: object}));
