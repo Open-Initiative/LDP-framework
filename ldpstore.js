@@ -110,7 +110,6 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
          var objects = Array.isArray(array) ? array : [array];
          objects.forEach(function(object) {
              this.get(object, this.context).then(function(object) {
-                 console.log(document.getElementById(id));
                  $('#'+id).append(options.fn(object));
              }.bind(this));
          }.bind(this));
@@ -315,14 +314,7 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
          });
      }
 
-     this.renderFromArray = function renderFromArray(divName, resourcesArray, templateName) {
-       var templateName = templateName ? templateName : this.mainTemplate;
-       this.getTemplateAjax(templateName, function(template) {
-           $(divName).html(template({object: resourcesArray}));
-       })
-     }
-
-      // render handlebars templates via ajax
+      // Get handlebars templates via ajax
       this.getTemplateAjax = function getTemplateAjax(path, callback) {
         var source, template;
         $.ajax({
