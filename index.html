@@ -6,40 +6,53 @@
         <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
         <script type="text/javascript" src="mystore.js"></script>
 
+        <!-- INLINE TEMPLATES -->
         <script id="profile-template" type="text/x-handlebars-template">
             <div>{{about.name}}: {{about.description}}</div>
         </script>
+
         <script id="people-template" type="text/x-handlebars-template">
-            People:
+          <div>
+            <h2>People:</h2>
             <div id="people">
                     {{#ldpeach object.ldp:contains "div"}}{{> profile }}{{/ldpeach}}
             </div>
+          </div>
         </script>
 
-        <script id="todo-template" type="text/x-handlebars-template">
-            <div className="todo">
-                <h4>{{todos:label}}</h4>
-                {{todos:assignee}}
-            </div>
-        </script>
-        <script id="todolist-template" type="text/x-handlebars-template">
-            <h2>Todo List!</h2>
-            {{#ldpeach object.ldp:contains "div"}}{{> todo }}{{/ldpeach}}
-            <h4>Add a new task</h4>
-            {{{form 'todos'}}}
-        </script>
+        <!-- EXTERNAL TEMPLATES, INCLUDED USING THE SRC ATTRIBUTE -->
+        <script id="todo-template" type="text/x-handlebars-template" src="templates/todo.handlebars"></script>
+        <script id="todolist-template" type="text/x-handlebars-template" src="templates/todolist.handlebars"></script>
 
         <script>
             $(function(){
                 window.store = new MyStore({
                     container: document.location.hash.slice(1)||"https://ldp.openinitiative.com:8443/2013/",
                     context: "http://owl.openinitiative.com/oicontext.jsonld",
-                    template: $("#people-template").html(),
-                    partials: {'profile': $("#profile-template").html(), 'todo': $("#todo-template").html()},
-                    models: {'todos': {fields: [{title: "What do you need to do today?", name: "todos:label"}, {title: "Who should do it?", name: "todos:assignee"}], container: "todos/"}},
+                    template: "#people-template",
+                    partials: {
+                      'profile': "#profile-template",
+                      'todo':    "#todo-template"
+                    },
+                    models:
+                      {
+                        'todos': {
+                          fields: [
+                            {
+                              title: "What do you need to do today?",
+                              name: "todos:label"
+                            },
+                            {
+                              title: "Who should do it?",
+                              name: "todos:assignee"
+                            }
+                          ],
+                          container: "todos/"
+                        }
+                      },
                 });
                 store.render("#profilebrowser", "people/");
-                store.render("#todolist", "todos/", $("#todolist-template").html());
+                store.render("#todolist", "todos/", "#todolist-template");
             });
         </script>
     </head>
