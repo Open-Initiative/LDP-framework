@@ -56,7 +56,13 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
      this.context        = options.context;
      this.models         = options.models;
 
-     if('template' in options) this.mainTemplate = options.template;
+     if ('template' in options) {
+       if (typeof(options.template) == 'object' && typeof(options.template) != 'String') {
+         Handlebars.compile(options.template);
+       } else {
+         this.mainTemplate = options.template;
+       }
+     }
 
      // The partial definition for displaying a form field
      var fieldPartial = "<label for='{{name}}'>{{title}}</label> \
@@ -92,7 +98,12 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
 
      if('partials' in options) {
        for(var partialName in options.partials) {
-         registerPartialFromFile(partialName, options.partials[partialName]);
+         var element = $(options.partials[partialName]);
+         if (element.attr('src')) {
+           registerPartialFromFile(partialName, element.attr('src'));
+         } else {
+           Handlebars.registerPartial(partialName, element.html());
+         }
        }
      }
 
@@ -308,9 +319,15 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
                });
              }
 
-             instance.getTemplateAjax(template, function(template) {
-                 $(div).html(template({object: object}));
-             })
+            var element = $(template);
+            if (typeof element.attr('src') !== 'undefined') {
+              instance.getTemplateAjax(element.attr('src'), function(template) {
+                $(div).html(template({object: object}));
+              });
+            } else {
+              template = Handlebars.compile(element.html());
+              $(div).html(template({object: object}));
+            }
          });
      }
 
