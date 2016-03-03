@@ -57,13 +57,10 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
      this.models         = options.models;
 
      if ('template' in options) {
-       console.log('Options template', options.template);
-       if (typeof(options.template) == 'object' && typeof(options.template) != 'String') {
+       if (typeof(options.template) == 'object' && typeof(options.template) != 'string') {
          this.mainTemplate = options.template;
-         console.log('main Template from object', this.mainTemplate);
        } else {
          this.mainTemplate = options.template;
-         console.log('main Template from else', this.mainTemplate);
        }
      }
 
@@ -318,14 +315,12 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
      this.render = function render(div, objectIri, template, context, modelName, prefix) {
          var objectIri = this.getIri(objectIri);
          var template = template ? template : this.mainTemplate;
-         console.log('Template', template);
          var context = context || this.context;
          var fields = modelName ? this.models[modelName].fields : null;
          var instance = this;
 
          this.get(objectIri).then(function(object) {
              if (fields) {
-               console.log(fields);
                fields.forEach( function(fields) {
                  var propertyName = fields.name;
                  if (prefix) {
@@ -333,14 +328,11 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
                  }
 
                  fields.fieldValue = object[propertyName];
-                 console.log(fields.fieldValue);
-                 console.log(object[propertyName]);
                });
              }
 
-            if (typeof template == 'String' && template.substring(0, 1) == '#') {
+            if (typeof(template) == 'string' && template.substring(0, 1) == '#') {
               var element = $(template);
-              console.log('element', element);
               if (element && typeof element.attr('src') !== 'undefined') {
                 instance.getTemplateAjax(element.attr('src'), function(template) {
                   $(div).html(template({object: object}));
