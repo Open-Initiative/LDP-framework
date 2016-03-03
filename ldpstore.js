@@ -57,10 +57,13 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
      this.models         = options.models;
 
      if ('template' in options) {
+       console.log('Options template', options.template);
        if (typeof(options.template) == 'object' && typeof(options.template) != 'String') {
-         Handlebars.compile(options.template);
+         this.mainTemplate = options.template;
+         console.log('main Template from object', this.mainTemplate);
        } else {
          this.mainTemplate = options.template;
+         console.log('main Template from else', this.mainTemplate);
        }
      }
 
@@ -315,6 +318,7 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
      this.render = function render(div, objectIri, template, context, modelName, prefix) {
          var objectIri = this.getIri(objectIri);
          var template = template ? template : this.mainTemplate;
+         console.log('Template', template);
          var context = context || this.context;
          var fields = modelName ? this.models[modelName].fields : null;
          var instance = this;
@@ -334,15 +338,22 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
                });
              }
 
-            var element = $(template);
-            if (typeof element.attr('src') !== 'undefined') {
-              instance.getTemplateAjax(element.attr('src'), function(template) {
+            if (typeof template == 'String' && template.substring(0, 1) == '#') {
+              var element = $(template);
+              console.log('element', element);
+              if (element && typeof element.attr('src') !== 'undefined') {
+                instance.getTemplateAjax(element.attr('src'), function(template) {
+                  $(div).html(template({object: object}));
+                });
+              } else {
+                template = Handlebars.compile(element.html());
                 $(div).html(template({object: object}));
-              });
+              }
             } else {
-              template = Handlebars.compile(element.html());
+              template = Handlebars.compile(template);
               $(div).html(template({object: object}));
             }
+
          });
      }
 
