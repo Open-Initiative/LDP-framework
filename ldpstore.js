@@ -56,13 +56,7 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
      this.context        = options.context;
      this.models         = options.models;
 
-     if ('template' in options) {
-       if (typeof(options.template) == 'object' && typeof(options.template) != 'String') {
-         Handlebars.compile(options.template);
-       } else {
-         this.mainTemplate = options.template;
-       }
-     }
+     if ('template' in options) this.mainTemplate = options.template;
 
      // The partial definition for displaying a form field
      var fieldPartial = "<label for='{{name}}'>{{title}}</label> \
@@ -76,7 +70,19 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
                                <select id='{{name}}' name='{{name}}'> \
                                  {{#each options}}{{> LDPOptions fieldValue='{{fieldValue}}' }}{{/each}} \
                              {{else}} \
-                               <input id='{{name}}' type='text' placeholder='{{title}}' name='{{name}}' value='{{fieldValue}}' />\
+                               {{#ifCond type 'date'}} \
+                                <input id='{{name}}' type='date' placeholder='YYYY-MM-DD' name='{{name}}' value='{{fieldValue}}' />\
+                               {{else}} \
+                                 {{#ifCond type 'url'}} \
+                                  <input id='{{name}}' type='url' placeholder='http://www.example.com' name='{{name}}' value='{{fieldValue}}' />\
+                                 {{else}} \
+                                   {{#ifCond type 'email'}} \
+                                    <input id='{{name}}' type='email' placeholder='contact@example.com' name='{{name}}' value='{{fieldValue}}' />\
+                                   {{else}} \
+                                    <input id='{{name}}' type='text' placeholder='{{title}}' name='{{name}}' value='{{fieldValue}}' />\
+                                   {{/ifCond}}\
+                                 {{/ifCond}}\
+                               {{/ifCond}}\
                              {{/ifCond}}\
                            {{/ifCond}}\
                          {{/ifCond}}";
@@ -319,15 +325,21 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
                });
              }
 
-            var element = $(template);
-            if (typeof element.attr('src') !== 'undefined') {
-              instance.getTemplateAjax(element.attr('src'), function(template) {
+            if (typeof(template) == 'string' && template.substring(0, 1) == '#') {
+              var element = $(template);
+              if (element && typeof element.attr('src') !== 'undefined') {
+                instance.getTemplateAjax(element.attr('src'), function(template) {
+                  $(div).html(template({object: object}));
+                });
+              } else {
+                template = Handlebars.compile(element.html());
                 $(div).html(template({object: object}));
-              });
+              }
             } else {
-              template = Handlebars.compile(element.html());
+              template = Handlebars.compile(template);
               $(div).html(template({object: object}));
             }
+
          });
      }
 
