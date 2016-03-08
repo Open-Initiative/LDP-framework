@@ -56,13 +56,7 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
      this.context        = options.context;
      this.models         = options.models;
 
-     if ('template' in options) {
-       if (typeof(options.template) == 'object' && typeof(options.template) != 'string') {
-         this.mainTemplate = options.template;
-       } else {
-         this.mainTemplate = options.template;
-       }
-     }
+     if ('template' in options) this.mainTemplate = options.template;
 
      // The partial definition for displaying a form field
      var fieldPartial = "<label for='{{name}}'>{{title}}</label> \
