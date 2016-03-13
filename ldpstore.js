@@ -303,7 +303,7 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
      this.getIri = function getIri(iri) {
          if(!iri) return this.container;
          if(iri.startsWith("http://")||iri.startsWith("https://")) return iri;
-         return this.container + iri;
+         return (this.container||"") + iri;
      }
 
      this.render = function render(div, objectIri, template, context, modelName, prefix) {
