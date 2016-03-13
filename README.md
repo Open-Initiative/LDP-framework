@@ -78,7 +78,7 @@ For more information on how all this works, please check the wiki:
 -> https://github.com/Open-Initiative/LDP-framework/wiki
 
 ## Installation process (for developers)
-If you would like to contribute, please note that the main file (mystore.js) is compiled (and minified ?) using Browserify.
+If you would like to contribute, please note that the main file (ldpframework.js) is compiled (and minified ?) using Browserify.
 
 So if you fork the project, all modifications/contributions should be done in the non-compiled sources. The main source file is the ldpstore.js one, containing the MyStore class.
 
@@ -107,7 +107,7 @@ sudo npm install -g browserify
 Browserify will allow you to compile the sources right after you made modifications, to test on the compiled version and keep a setup close to production.
 To compile the sources, use the following command:
 ```
-browserify ldpstore.js -o mystore.js
+browserify ldpstore.js -o ldpframework.js
 ```
 
 You can also use Grunt to watch the changes and process automatic compiling while working. To be able to use Grunt, please install it using
@@ -121,7 +121,7 @@ Then, using the following command:
 grunt watch
 ```
 
-From the project root folder, you should see that any changes to the source ldpstore.js should be compiled into the mystore.js file.
+From the project root folder, you should see that any changes to the source ldpstore.js should be compiled into the ldpframework.js file.
 
 ##Dependencies
 

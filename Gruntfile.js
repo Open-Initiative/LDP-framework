@@ -10,7 +10,7 @@ module.exports = function(grunt) {
     browserify: {
       js: {
         src: './ldpstore.js',
-        dest: './mystore.js'
+        dest: './ldpframework.js'
       }
     }
   })
