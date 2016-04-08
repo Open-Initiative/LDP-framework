@@ -1,0 +1,60 @@
+<template id="member-template">
+    <style scoped>
+        img {
+            max-height: 3em;
+            border-radius: 50px;
+        }
+        #member-info {
+            display: inline-block;
+        }
+    </style>
+    <div>
+        <content select="img"></content>
+        <content id="member-info"></content>
+</template>
+
+<script>
+    var localDoc = document._currentScript.ownerDocument;
+    window.store = new MyStore({context: "http://owl.openinitiative.com/oicontext.jsonld"});
+    
+    document.registerElement('hd-team-member', {
+        prototype: Object.create(HTMLElement.prototype, {
+            createdCallback: {
+                value: function() {
+                    var shadow = this.createShadowRoot();
+                    if(this.dataset.src) {
+                        store.get(this.dataset.src).then(function(member) {
+                            var img = document.createElement("img");
+                            img.src = member["foaf:img"];
+                            shadow.appendChild(img);
+                            shadow.appendChild(document.createTextNode(member["foaf:firstName"] + " " + member["foaf:name"]));
+                        });
+                    }
+                    var clone = document.importNode(localDoc.querySelector('#member-template').content, true);
+                    shadow.appendChild(clone);
+                }
+            }
+        })
+    });
+    
+    document.registerElement('hd-team', {
+        prototype: Object.create(HTMLElement.prototype, {
+            createdCallback: {
+                value: function() {
+                    if(this.dataset.src) {
+                        store.list(this.dataset.src).then(function(list) {
+                            list.forEach(function(member) {
+                                var memberElt = document.createElement("hd-team-member");
+                                var img = document.createElement("img");
+                                img.src = member["foaf:img"];
+                                memberElt.appendChild(img);
+                                memberElt.appendChild(document.createTextNode(member["foaf:firstName"] + " " + member["foaf:name"]));
+                                this.appendChild(memberElt);
+                            }.bind(this));
+                        }.bind(this));
+                    }
+                }
+            }
+        })
+    });
+</script>

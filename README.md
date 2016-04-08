@@ -6,6 +6,7 @@ Just create js objects and forget about the server. The framework handles that f
 
 ##Features
 See index.html as an example.
+You can also see webcomponents.html for an example based on web components.
 
 ### Store Initialization
 `new MyStore({options...})`
