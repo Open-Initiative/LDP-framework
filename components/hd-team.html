@@ -1,8 +1,9 @@
 <template id="member-template">
     <style scoped>
         img {
-            max-height: 3em;
+            max-height: 4em;
             border-radius: 50px;
+            max-width: 3em;
         }
         #member-info {
             display: inline-block;
@@ -13,6 +14,7 @@
         <content id="member-info"></content>
 </template>
 
+<script type="text/javascript" src="../ldpframework.js"></script>
 <script>
     var localDoc = document._currentScript.ownerDocument;
     window.store = new MyStore({context: "http://owl.openinitiative.com/oicontext.jsonld"});
