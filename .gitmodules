@@ -1,0 +1,3 @@
+[submodule "LDP-Components"]
+	path = LDP-Components
+	url = https://github.com/HappyDev-team/LDP-Components.git
