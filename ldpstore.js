@@ -152,6 +152,8 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
      var storeOptions = {};
      if ('corsProxy' in options)
          storeOptions.request = rdf.corsProxyRequest.bind(rdf, options.corsProxy);
+     if ('defaultSerializer' in options)
+         storeOptions.defaultSerializer = options.defaultSerializer;
 
      var store = options.store || new rdf.promise.Store(new rdf.LdpStore(storeOptions)),
          parser = new rdf.promise.Parser(new rdf.JsonLdParser()),
