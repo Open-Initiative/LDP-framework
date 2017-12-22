@@ -278,9 +278,9 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
              object['@context'] = this.context;
 
          if('@id' in object)
-             this.put(object);
+             return this.put(object);
          else
-             this.add(this.getIri(container), object);
+             return this.add(this.getIri(container), object);
      }
 
      this.list = function list(containerIri) {
@@ -368,21 +368,15 @@ JsonLdUtils.fromRDF = JsonLdUtils.funcTemplate(jsonld.fromRDF);
      */
     this.add = function () {
         var param = parseIriObjectsArgs(arguments);
+        var context = this.context;
 
         return this.objectsToGraph("", param.objects)
             .then(function (graph) { return store.add(documentIri(param.iri), graph, {'method': 'POST', 'headers': param.headers}); }.bind(this))
-            .then(function (added, error) {
-                return new Promise(function (resolve, reject) {
-                    if (error != null) {
-                        return reject(error);
-                    }
-
-                    if (added.toArray().length === 0) {
-                        return reject('no triples added');
-                    }
-
-                    resolve();
-                });
+            .then(function(graph) {return serializer.serialize(graph)}.bind(this))
+            .then(function (expanded) { return JsonLdUtils.frame(expanded, {}); })
+            .then(function (framed) {
+                //var frame = framed['@graph'].reduce(function (p, c) { return (c['@id'] == iri ? c : p); }, {});
+                return JsonLdUtils.compact(framed, context);
             });
     };
     /**
@@ -30489,7 +30483,7 @@ var JsonLdParser = function (rdf, options) {
 
     var processObject = function (jObject) {
       // is it a simple literal?
-      if (typeof jObject === 'string') {
+      if (typeof jObject === 'string' || typeof jObject === 'number' || typeof jObject === 'boolean') {
         return rdf.createLiteral(jObject);
       }
 
@@ -30782,7 +30776,6 @@ var LdpStore = function (rdf, options) {
         if ('forceContentType' in options && options.forceContentType in self.parsers) {
           contentType = options.forceContentType;
         }
-
         self.parsers[contentType](content, function (graph, error) {
           // parser error
           if (error) {
@@ -30838,6 +30831,8 @@ var LdpStore = function (rdf, options) {
       if (error) {
         return callback(null, error);
       }
+      
+      data = `{"@context": "http://owl.openinitiative.com/oicontext.jsonld", "@graph": ${JSON.stringify(data)}}`;
 
       self.request(method, iri, headers, data, function (statusCode, headers, content, error) {
         // error during request
@@ -30850,7 +30845,11 @@ var LdpStore = function (rdf, options) {
           return callback(null, 'status code error: ' + statusCode);
         }
 
-        callback(graph);
+        // use default parser...
+        var contentType = self.defaultParser;
+        (new rdf.JsonLdParser()).parse(content, function (graph, error) {
+            callback(graph);
+        });
       });
     });
   };
@@ -31390,7 +31389,7 @@ var SerializerPromiseWrapper = function (p, serializer) {
 var StorePromiseWrapper = function (p, store) {
   this.graph = funcTemplate(function (args, callback) { store.graph(args[0], callback); }, p);
   this.match = funcTemplate(function (args, callback) { store.match(args[0], args[1], args[2], args[3], callback, args[5]); }, p);
-  this.add = funcTemplate(function (args, callback) { store.add(args[0], args[1], callback); }, p);
+  this.add = funcTemplate(function (args, callback) { store.add(args[0], args[1], callback, args[2]); }, p);
   this.merge = funcTemplate(function (args, callback) { store.merge(args[0], args[1], callback); }, p);
   this.remove = funcTemplate(function (args, callback) { store.remove(args[0], args[1], callback); }, p);
   this.removeMatches = funcTemplate(function (args, callback) { store.removeMatches(args[0], args[1], args[2], args[3], callback); }, p);
@@ -32741,6 +32740,7 @@ utils.defaultRequest = function (method, requestUrl, headers, content, callback)
     }
   };
 
+  xhr.withCredentials = true;
   xhr.open(method, requestUrl, true);
 
   for (var header in headers) {
